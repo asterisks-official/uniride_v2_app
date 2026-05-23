@@ -73,11 +73,17 @@ A screen/feature is not "done" until:
 - My Rides (rider): own offers + pending request counts; **cancel ride** with reason.
 - *DoD:* full matching loop works end-to-end against the live backend.
 
-### Phase 3 — Maps & location
-- Google Maps key (Android + iOS), runtime location permission UX.
-- Create-ride: tap-to-pin + place search (origin/dest), reverse-geocode addresses.
-- Route preview + distance/ETA on cards & detail; proximity filter on feed.
-- *DoD:* real location selection and route display.
+### Phase 3 — Maps & location (OpenStreetMap)
+- **Maps via `flutter_map` + OpenStreetMap tiles** — no Google Maps key/billing.
+  `latlong2` for coordinates, `geolocator` for current location + permission UX.
+- Geocoding / place search + reverse-geocode via **Nominatim** (OSM); routing/ETA
+  via OSRM optional for v1.
+- Create-ride: tap-to-pin origin/dest + place search; proximity filter on feed.
+- **Production note:** the public OSM tile + Nominatim servers are rate-limited
+  and *not* for production load. Pick a compliant tile + geocoding provider
+  (MapTiler / Stadia / LocationIQ free tier, or self-host) and set a proper
+  `User-Agent` before release.
+- *DoD:* real location selection + route display on OSM; prod provider chosen.
 
 ### Phase 4 — Real-time active ride
 - Socket.IO service (JWT auth, exponential reconnect, lifecycle on auth/app-state).
@@ -96,10 +102,14 @@ A screen/feature is not "done" until:
 - "Share my trip" with an external contact (deep link / SMS).
 - *DoD:* users can rate, report, and feel safe; abuse has a path.
 
-### Phase 7 — Payments (BDT)
-- Decision required (see §7): real gateway (bKash / Nagad / SSLCommerz) vs **cash-confirm v1**.
-- Payment status on ride completion; earnings view for riders (`/payments/earnings`).
-- *DoD:* fare settlement is explicit and recorded.
+### Phase 7 — Cash settlement (v1, no gateway)
+- **Cash only.** No payment gateway. Fare is shown up front; on completion the
+  app shows "Pay ৳X in cash" to the passenger and "Collect ৳X" to the rider.
+- Record the cash payment (status COMPLETED) so rider **earnings**
+  (`/payments/earnings`) and history stay accurate.
+- Small enough to **fold into ride completion** (Phase 4/6) rather than a separate build.
+- *DoD:* fare is clear before/after the ride; cash settlement recorded; earnings reflect it.
+- *Later:* an online gateway (bKash/Nagad/SSLCommerz) can slot in behind the same payment record.
 
 ### Phase 8 — Notifications & deep links
 - FCM: foreground (in-app), background, and **tap → deep-link routing** to the relevant ride/chat.
@@ -184,7 +194,7 @@ Button is contextual: Request → "Requested ✓ (cancel)" → if matched, "Open
 ---
 
 ## 6. Production readiness checklist
-- **Security**: tokens in secure storage ✔; cert pinning (consider); no secrets in repo; Maps key restricted by signing/bundle id.
+- **Security**: tokens in secure storage ✔; cert pinning (consider); no secrets in repo; OSM tile/geocoding provider key (if any) restricted by signing/bundle id.
 - **Privacy/compliance**: privacy policy + ToS, in-app consent, account + data deletion, minimal location retention.
 - **Safety**: rider verification ✔, gender preference enforced, SOS, report/block, share-trip.
 - **Reliability**: socket reconnect/backoff, request idempotency, offline queue for chat send.
@@ -195,18 +205,31 @@ Button is contextual: Request → "Requested ✓ (cancel)" → if matched, "Open
 
 ---
 
-## 7. Open decisions & risks
-1. **Payments**: which BDT method for v1 — bKash/Nagad/SSLCommerz integration, or **cash-confirm** with status tracking only? (Gateway adds compliance + time.)
-2. **Passenger-posted ride requests**: backend supports `RideType.REQUEST` but create is RIDER-only. Expose two-sided posting, or rider-offers-only for v1?
-3. **Rejected rider resubmit**: backend profile-update doesn't reset status to PENDING — add a resubmit path.
-4. **Maps**: need a Google Maps API key + billing enabled before Phase 3.
-5. **Push**: confirm the FCM project + `google-services.json` / `GoogleService-Info.plist`.
-6. **Background location**: foreground-only for v1 to ease store review; revisit if needed.
-7. **Email deliverability**: warm up `bitstreamhq.com` (SPF/DKIM ✔, add DMARC) so OTPs don't spam-folder.
+## 7. Decisions & open items
+
+**Decided**
+- **Payments: cash only for v1** — no gateway. App shows the fare and records
+  cash settlement; online gateway deferred behind the same payment record.
+- **Maps: OpenStreetMap** via `flutter_map` (no Google Maps key/billing). Pubspec
+  change: remove `google_maps_flutter`; add `flutter_map` + `latlong2`
+  (+ `geolocator` for device location).
+
+**Still open**
+1. **OSM provider for production**: public OSM tiles + Nominatim are rate-limited /
+   dev-only — choose a compliant tile + geocoding provider (MapTiler / Stadia /
+   LocationIQ free tier, or self-host) and set a `User-Agent` before release.
+2. **Passenger-posted ride requests**: backend supports `RideType.REQUEST` but
+   create is RIDER-only. Two-sided posting, or rider-offers-only for v1?
+3. **Rejected rider resubmit**: backend profile-update doesn't reset status to
+   PENDING — add a resubmit path.
+4. **Push**: confirm the FCM project + `google-services.json` / `GoogleService-Info.plist`.
+5. **Background location**: foreground-only for v1 to ease store review; revisit if needed.
+6. **Email deliverability**: warm up `bitstreamhq.com` (SPF/DKIM ✔, add DMARC) so OTPs don't spam-folder.
 
 ---
 
 ## 8. Suggested order to start
-**Phase 0 → 1 → 2** gets a usable, testable matching app with zero external
-keys. Maps (3) and realtime (4) follow once the Maps key + FCM project are ready.
-Payments (7) and launch (9) are parallelizable workstreams.
+**Phase 0 → 1 → 2** gets a usable, testable matching app with zero external keys.
+With OSM (no Maps key) and cash-only (no gateway), **Maps (3) is no longer
+blocked** and can move up right after the matching loop; only realtime (4) still
+needs the FCM project for push. Cash settlement (7) folds into completion.
