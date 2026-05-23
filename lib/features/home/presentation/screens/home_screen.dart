@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../../../auth/presentation/providers/auth_notifier.dart';
 import '../../../rides/presentation/providers/rides_feed_notifier.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/error_retry.dart';
@@ -61,18 +60,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final feed = ref.watch(ridesFeedProvider);
-    final auth = ref.watch(authNotifierProvider);
-    final isRider = auth is Authenticated && auth.user.role == 'RIDER';
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Rides'),
         centerTitle: false,
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/rides/create'),
-        icon: const Icon(Icons.add),
-        label: Text(isRider ? 'Offer Ride' : 'Request Ride'),
       ),
       body: Column(
         children: [

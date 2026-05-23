@@ -112,8 +112,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
+      // My Rides as a full-screen push destination (accessible from Profile)
+      GoRoute(
+        path: '/rides',
+        builder: (_, _) => const MyRidesScreen(),
+      ),
 
-      // Authenticated shell with bottom nav
+      // Authenticated shell with bottom nav (Home | Create | Alerts | Profile)
       StatefulShellRoute.indexedStack(
         builder: (_, _, navigationShell) =>
             AppShell(navigationShell: navigationShell),
@@ -123,14 +128,6 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/home',
                 builder: (_, _) => const HomeScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/rides',
-                builder: (_, _) => const MyRidesScreen(),
               ),
             ],
           ),

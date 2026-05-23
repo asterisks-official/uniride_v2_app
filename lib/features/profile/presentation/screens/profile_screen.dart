@@ -178,15 +178,21 @@ class _ProfileBody extends ConsumerWidget {
 
           const SizedBox(height: 8),
 
-          // Rider actions
+          // Rides & rider actions
           Container(
             color: AppColors.surface,
             child: Column(
               children: [
                 _MenuItem(
+                  icon: Icons.directions_car_outlined,
+                  label: 'My Rides',
+                  onTap: () => context.push('/rides'),
+                ),
+                const Divider(height: 1, indent: 56),
+                _MenuItem(
                   icon: profile.isRider
-                      ? Icons.directions_car
-                      : Icons.directions_car_outlined,
+                      ? Icons.verified_outlined
+                      : Icons.directions_car,
                   label: profile.isRider ? 'Rider status' : 'Become a Rider',
                   onTap: () => context.push('/verification'),
                 ),

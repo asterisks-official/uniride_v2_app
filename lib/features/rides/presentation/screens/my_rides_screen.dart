@@ -23,14 +23,16 @@ class MyRidesScreen extends ConsumerWidget {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => context.push('/rides/create'),
-          icon: const Icon(Icons.add),
-          label: Text(isRider ? 'Offer Ride' : 'Request Ride'),
-        ),
         appBar: AppBar(
           title: const Text('My Rides'),
           centerTitle: false,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.add_circle_outline),
+              tooltip: isRider ? 'Offer Ride' : 'Request Ride',
+              onPressed: () => context.push('/rides/create'),
+            ),
+          ],
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Active'),
