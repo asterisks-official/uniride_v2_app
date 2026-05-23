@@ -5,6 +5,20 @@ allprojects {
     }
 }
 
+// Kotlin 2.2+ dropped support for language version ≤1.6.
+// Force all plugin subprojects (sentry_flutter, etc.) to use at least 1.9.
+subprojects {
+    afterEvaluate {
+        tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile>().configureEach {
+            compilerOptions {
+                languageVersion.set(
+                    org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_1_9
+                )
+            }
+        }
+    }
+}
+
 val newBuildDir: Directory =
     rootProject.layout.buildDirectory
         .dir("../../build")

@@ -69,6 +69,7 @@ class _LoginFormState extends ConsumerState<_LoginForm> {
       await ref.read(authNotifierProvider.notifier).login(
             email: _email.text.trim(),
             password: _password.text,
+            rememberMe: _rememberMe,
           );
     } on AppException catch (e) {
       if (mounted) {

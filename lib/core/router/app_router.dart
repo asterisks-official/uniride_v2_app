@@ -8,7 +8,14 @@ import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/notifications/presentation/screens/alerts_screen.dart';
+import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/rider/presentation/screens/rider_verification_screen.dart';
+import '../../features/rides/presentation/screens/create_ride_screen.dart';
+import '../../features/rides/presentation/screens/my_rides_screen.dart';
+import '../../features/rides/presentation/screens/ride_detail_screen.dart';
+import '../../features/rides/presentation/screens/ride_requests_screen.dart';
+import '../../shared/screens/app_shell.dart';
 import '../../shared/screens/splash_screen.dart';
 
 const _authRoutes = {
@@ -20,7 +27,6 @@ const _authRoutes = {
 };
 
 final routerProvider = Provider<GoRouter>((ref) {
-  // Bridge Riverpod auth state changes into a Listenable GoRouter can refresh on.
   final refresh = ValueNotifier(0);
   ref.listen(authNotifierProvider, (_, _) => refresh.value++);
   ref.onDispose(refresh.dispose);
@@ -42,13 +48,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/login';
       }
 
-      // Authenticated: keep the user out of splash/auth screens.
+      // Authenticated: keep out of splash/auth screens.
       if (loc == '/splash' || _authRoutes.contains(loc)) return '/home';
       return null;
     },
     routes: [
+      // Public / auth routes (outside the shell — no bottom nav)
       GoRoute(path: '/splash', builder: (_, _) => const SplashScreen()),
-      GoRoute(path: '/login', builder: (_, _) => const AuthScreen(initialTab: 0)),
+      GoRoute(
+        path: '/login',
+        builder: (_, _) => const AuthScreen(initialTab: 0),
+      ),
       GoRoute(
         path: '/register',
         builder: (_, _) => const AuthScreen(initialTab: 1),
@@ -77,10 +87,70 @@ final routerProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
-      GoRoute(path: '/home', builder: (_, _) => const HomeScreen()),
+
+      // Full-screen authenticated routes (no bottom nav)
       GoRoute(
         path: '/verification',
         builder: (_, _) => const RiderVerificationScreen(),
+      ),
+      // /rides/create must come before /rides/:id to avoid being captured as id='create'
+      GoRoute(
+        path: '/rides/create',
+        builder: (_, _) => const CreateRideScreen(),
+      ),
+      GoRoute(
+        path: '/rides/:id',
+        builder: (_, state) => RideDetailScreen(
+          rideId: state.pathParameters['id']!,
+        ),
+        routes: [
+          GoRoute(
+            path: 'requests',
+            builder: (_, state) => RideRequestsScreen(
+              rideId: state.pathParameters['id']!,
+            ),
+          ),
+        ],
+      ),
+
+      // Authenticated shell with bottom nav
+      StatefulShellRoute.indexedStack(
+        builder: (_, _, navigationShell) =>
+            AppShell(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/home',
+                builder: (_, _) => const HomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/rides',
+                builder: (_, _) => const MyRidesScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/alerts',
+                builder: (_, _) => const AlertsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/profile',
+                builder: (_, _) => const ProfileScreen(),
+              ),
+            ],
+          ),
+        ],
       ),
     ],
   );

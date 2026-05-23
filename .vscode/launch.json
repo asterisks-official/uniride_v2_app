@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "UniRide (dev)",
+      "request": "launch",
+      "type": "dart",
+      "args": ["--dart-define=FLAVOR=dev"]
+    },
+    {
+      "name": "UniRide (prod)",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--dart-define=FLAVOR=prod",
+        "--dart-define=SENTRY_DSN=${SENTRY_DSN}"
+      ]
+    }
+  ]
+}

@@ -6,6 +6,8 @@ import '../../features/auth/data/repositories/auth_repository.dart';
 import '../../features/auth/presentation/providers/auth_notifier.dart';
 import '../../features/rider/data/datasources/rider_remote_datasource.dart';
 import '../../features/rider/data/repositories/rider_repository.dart';
+import '../../features/rides/data/datasources/rides_remote_datasource.dart';
+import '../../features/rides/data/repositories/rides_repository.dart';
 import '../network/api_client.dart';
 import '../storage/secure_storage.dart';
 
@@ -38,4 +40,12 @@ final riderRemoteDataSourceProvider = Provider<RiderRemoteDataSource>((ref) {
 
 final riderRepositoryProvider = Provider<RiderRepository>((ref) {
   return RiderRepository(ref.watch(riderRemoteDataSourceProvider));
+});
+
+final ridesRemoteDataSourceProvider = Provider<RidesRemoteDataSource>((ref) {
+  return RidesRemoteDataSource(ref.watch(apiClientProvider).dio);
+});
+
+final ridesRepositoryProvider = Provider<RidesRepository>((ref) {
+  return RidesRepository(ref.watch(ridesRemoteDataSourceProvider));
 });

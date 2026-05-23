@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 
 import '../../../../core/network/api_exception_mapper.dart';
@@ -44,13 +46,18 @@ class AuthRepository {
     return _guard(() async {
       final data = await _remote.verifyEmail(otp);
       await _saveTokens(data);
-      return User.fromJson(data['user'] as Map<String, dynamic>);
+      final user = User.fromJson(data['user'] as Map<String, dynamic>);
+      // Verification always implies the user wants a persistent session.
+      await _storage.saveRememberMe(true);
+      await _storage.saveUserJson(jsonEncode(user.toJson()));
+      return user;
     });
   }
 
   Future<User> login({
     required String email,
     required String password,
+    bool rememberMe = true,
     String? fcmToken,
     String? deviceType,
   }) {
@@ -62,7 +69,11 @@ class AuthRepository {
         deviceType: deviceType,
       );
       await _saveTokens(data);
-      return User.fromJson(data['user'] as Map<String, dynamic>);
+      final user = User.fromJson(data['user'] as Map<String, dynamic>);
+      await _storage.saveRememberMe(rememberMe);
+      // Cache the user so the next app start skips the /me network call.
+      if (rememberMe) await _storage.saveUserJson(jsonEncode(user.toJson()));
+      return user;
     });
   }
 
@@ -108,17 +119,44 @@ class AuthRepository {
       final tokens = await _remote.refresh(refreshToken);
       await _saveTokens(tokens);
       final me = await _remote.getMe();
-      return User.fromJson(me);
+      final user = User.fromJson(me);
+      await _storage.saveUserJson(jsonEncode(user.toJson()));
+      return user;
     });
   }
 
-  /// Restores a session on app start using stored tokens, or null if none/invalid.
+  /// Restores a session on app start.
+  ///
+  /// Returns immediately from the local cache when available — no network
+  /// round-trip — so the splash stays on screen for milliseconds, not seconds.
+  /// If `remember_me` was false the session is wiped and null is returned.
   Future<User?> tryRestoreSession() async {
+    // Honour the remember-me preference: wipe session on next cold start.
+    final rememberMe = await _storage.readRememberMe();
+    if (!rememberMe) {
+      await _storage.clear();
+      return null;
+    }
+
     final token = await _storage.readAccessToken();
     if (token == null || token.isEmpty) return null;
+
+    // Fast path: return cached user without a network round-trip.
+    final cachedJson = await _storage.readUserJson();
+    if (cachedJson != null) {
+      try {
+        return User.fromJson(jsonDecode(cachedJson) as Map<String, dynamic>);
+      } catch (_) {
+        // Corrupt cache — fall through to network.
+      }
+    }
+
+    // Slow path (no cache yet, e.g. first launch after upgrading the app).
     try {
       final data = await _remote.getMe();
-      return User.fromJson(data);
+      final user = User.fromJson(data);
+      await _storage.saveUserJson(jsonEncode(user.toJson()));
+      return user;
     } on DioException {
       await _storage.clear();
       return null;

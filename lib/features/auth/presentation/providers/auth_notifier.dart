@@ -37,8 +37,16 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   /// Throws [AppException] on failure; sets [Authenticated] on success.
-  Future<void> login({required String email, required String password}) async {
-    final user = await _repo.login(email: email, password: password);
+  Future<void> login({
+    required String email,
+    required String password,
+    bool rememberMe = true,
+  }) async {
+    final user = await _repo.login(
+      email: email,
+      password: password,
+      rememberMe: rememberMe,
+    );
     state = Authenticated(user);
   }
 

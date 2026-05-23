@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/exceptions/app_exception.dart';
 import '../../../../shared/widgets/app_button.dart';
+import '../../../../shared/widgets/error_retry.dart';
+import '../../../../shared/widgets/skeleton.dart';
 import '../../../auth/presentation/providers/auth_notifier.dart';
 import '../../domain/models/rider_profile.dart';
 import '../providers/rider_notifier.dart';
@@ -18,37 +20,14 @@ class RiderVerificationScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Become a Rider')),
       body: state.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => _ErrorRetry(
+        loading: () => const FormScreenSkeleton(fieldCount: 5),
+        error: (e, _) => ErrorRetry(
           message: e is AppException ? e.message : 'Something went wrong',
           onRetry: () => ref.read(riderNotifierProvider.notifier).reload(),
         ),
         data: (profile) => profile == null
             ? const _RiderForm()
             : _RiderStatus(profile: profile),
-      ),
-    );
-  }
-}
-
-class _ErrorRetry extends StatelessWidget {
-  const _ErrorRetry({required this.message, required this.onRetry});
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(message, textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            OutlinedButton(onPressed: onRetry, child: const Text('Retry')),
-          ],
-        ),
       ),
     );
   }

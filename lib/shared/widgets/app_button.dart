@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'skeleton.dart';
+
 class AppButton extends StatelessWidget {
   const AppButton({
     super.key,
@@ -17,14 +19,7 @@ class AppButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: loading ? null : onPressed,
       child: loading
-          ? const SizedBox(
-              height: 22,
-              width: 22,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.white,
-              ),
-            )
+          ? const SkeletonBox(width: 80, height: 16, borderRadius: 8)
           : Text(label),
     );
   }
