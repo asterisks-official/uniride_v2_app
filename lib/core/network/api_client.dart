@@ -1,18 +1,35 @@
 import 'package:dio/dio.dart';
 
-class ApiClient {
-  late final Dio _dio;
+import '../constants/app_constants.dart';
+import '../storage/secure_storage.dart';
+import 'auth_interceptor.dart';
 
-  ApiClient({required String baseUrl}) {
-    _dio = Dio(
-      BaseOptions(
-        baseUrl: baseUrl,
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 15),
-        headers: {'Content-Type': 'application/json'},
-      ),
+class ApiClient {
+  ApiClient({
+    required SecureStorage storage,
+    void Function()? onSessionExpired,
+  }) {
+    final base = BaseOptions(
+      baseUrl: AppConstants.apiBaseUrl,
+      connectTimeout: AppConstants.connectTimeout,
+      receiveTimeout: AppConstants.receiveTimeout,
+      headers: {'Content-Type': 'application/json'},
     );
+
+    // Separate Dio used by the interceptor for refresh + retry (no auth interceptor).
+    final refreshDio = Dio(base);
+
+    _dio = Dio(base)
+      ..interceptors.add(
+        AuthInterceptor(
+          storage: storage,
+          refreshDio: refreshDio,
+          onSessionExpired: onSessionExpired,
+        ),
+      );
   }
+
+  late final Dio _dio;
 
   Dio get dio => _dio;
 }

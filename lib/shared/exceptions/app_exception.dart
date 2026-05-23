@@ -8,7 +8,8 @@ class NetworkException extends AppException {
 }
 
 class UnauthorizedException extends AppException {
-  const UnauthorizedException() : super('Session expired. Please log in again.');
+  const UnauthorizedException([String? message])
+      : super(message ?? 'Session expired. Please log in again.');
 }
 
 class ServerException extends AppException {
