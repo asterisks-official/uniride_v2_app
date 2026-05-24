@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'core/config/app_env.dart';
+import 'core/providers/onboarding_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 
@@ -15,6 +16,12 @@ void main() async {
   // Firebase.initializeApp() goes here once google-services.json / GoogleService-Info.plist
   // are added and firebase_options.dart is generated via flutterfire configure.
 
+  final onboardingSeen = await getOnboardingSeen();
+
+  final overrides = [
+    onboardingSeenProvider.overrideWith(() => OnboardingNotifier(onboardingSeen)),
+  ];
+
   if (_sentryDsn.isNotEmpty) {
     await SentryFlutter.init(
       (options) {
@@ -23,10 +30,11 @@ void main() async {
         options.tracesSampleRate = AppEnv.isDev ? 1.0 : 0.2;
         options.debug = AppEnv.isDev;
       },
-      appRunner: () => runApp(const ProviderScope(child: UniRideApp())),
+      appRunner: () =>
+          runApp(ProviderScope(overrides: overrides, child: const UniRideApp())),
     );
   } else {
-    runApp(const ProviderScope(child: UniRideApp()));
+    runApp(ProviderScope(overrides: overrides, child: const UniRideApp()));
   }
 }
 

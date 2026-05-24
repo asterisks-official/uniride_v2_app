@@ -2,8 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/providers/onboarding_provider.dart';
 import '../../features/auth/presentation/providers/auth_notifier.dart';
 import '../../features/auth/presentation/screens/auth_screen.dart';
+import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/screens/reset_password_screen.dart';
@@ -29,6 +31,7 @@ const _authRoutes = {
 final routerProvider = Provider<GoRouter>((ref) {
   final refresh = ValueNotifier(0);
   ref.listen(authNotifierProvider, (_, _) => refresh.value++);
+  ref.listen(onboardingSeenProvider, (_, _) => refresh.value++);
   ref.onDispose(refresh.dispose);
 
   return GoRouter(
@@ -38,8 +41,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       final auth = ref.read(authNotifierProvider);
       final loc = state.matchedLocation;
 
+      // Wait for session restore.
       if (auth is AuthUnknown) {
         return loc == '/splash' ? null : '/splash';
+      }
+
+      // Show onboarding on first install before anything else.
+      final onboardingSeen = ref.read(onboardingSeenProvider);
+      if (!onboardingSeen) {
+        return loc == '/onboarding' ? null : '/onboarding';
       }
 
       final loggedIn = auth is Authenticated;
@@ -48,13 +58,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/login';
       }
 
-      // Authenticated: keep out of splash/auth screens.
-      if (loc == '/splash' || _authRoutes.contains(loc)) return '/home';
+      // Authenticated: redirect away from splash/auth/onboarding.
+      if (loc == '/splash' || loc == '/onboarding' || _authRoutes.contains(loc)) {
+        return '/home';
+      }
       return null;
     },
     routes: [
       // Public / auth routes (outside the shell — no bottom nav)
       GoRoute(path: '/splash', builder: (_, _) => const SplashScreen()),
+      GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingScreen()),
       GoRoute(
         path: '/login',
         builder: (_, _) => const AuthScreen(initialTab: 0),
