@@ -106,11 +106,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/verification',
         builder: (_, _) => const RiderVerificationScreen(),
       ),
-      // /rides/create must come before /rides/:id to avoid being captured as id='create'
-      GoRoute(
-        path: '/rides/create',
-        builder: (_, _) => const CreateRideScreen(),
-      ),
       GoRoute(
         path: '/rides/:id',
         builder: (_, state) => RideDetailScreen(
@@ -141,6 +136,14 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/home',
                 builder: (_, _) => const HomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/create',
+                builder: (_, _) => const CreateRideScreen(),
               ),
             ],
           ),

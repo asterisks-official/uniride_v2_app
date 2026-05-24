@@ -66,34 +66,71 @@ class RideCardSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
         color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Rider row
           Row(
             children: [
               const SkeletonBox(width: 40, height: 40, borderRadius: 20),
               const SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  SkeletonBox(width: 120, height: 14),
-                  SizedBox(height: 6),
-                  SkeletonBox(width: 80, height: 12),
-                ],
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SkeletonBox(width: 110, height: 13),
+                    SizedBox(height: 5),
+                    SkeletonBox(width: 75, height: 11),
+                  ],
+                ),
+              ),
+              const SkeletonBox(width: 36, height: 13),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Route
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    SkeletonBox(width: double.infinity, height: 12),
+                    SizedBox(height: 16),
+                    SkeletonBox(width: 180, height: 12),
+                  ],
+                ),
               ),
             ],
           ),
           const SizedBox(height: 14),
-          const SkeletonBox(width: double.infinity, height: 14),
-          const SizedBox(height: 8),
-          const SkeletonBox(width: 160, height: 12),
+          const Divider(color: AppColors.border, height: 1),
+          const SizedBox(height: 12),
+          // Info chips
+          Row(
+            children: const [
+              SkeletonBox(width: 90, height: 26, borderRadius: 8),
+              SizedBox(width: 8),
+              SkeletonBox(width: 60, height: 26, borderRadius: 8),
+              SizedBox(width: 8),
+              SkeletonBox(width: 68, height: 26, borderRadius: 8),
+            ],
+          ),
         ],
       ),
     );

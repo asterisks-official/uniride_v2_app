@@ -1,14 +1,17 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../../../rides/presentation/providers/rides_feed_notifier.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/error_retry.dart';
 import '../../../../shared/widgets/ride_card.dart';
 import '../../../../shared/widgets/skeleton.dart';
+import '../../../auth/presentation/providers/auth_notifier.dart';
+import '../../../rides/presentation/providers/rides_feed_notifier.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -62,33 +65,115 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final feed = ref.watch(ridesFeedProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Rides'),
-        centerTitle: false,
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            _HomeHeader(),
+            _FilterBar(
+              dateFilter: feed.dateFilter,
+              femaleOnly: feed.femaleOnly,
+              onDateTap: () => _pickDate(context),
+              onClearDate: () =>
+                  ref.read(ridesFeedProvider.notifier).setDateFilter(null),
+              onFemaleOnlyToggle: (v) =>
+                  ref.read(ridesFeedProvider.notifier).setFemaleOnly(v),
+            ),
+            Expanded(
+              child: _FeedBody(
+                feed: feed,
+                scrollController: _scrollController,
+                onRefresh: () => ref.read(ridesFeedProvider.notifier).refresh(),
+                onRetry: () => ref.read(ridesFeedProvider.notifier).refresh(),
+                onRideTap: (id) => context.push('/rides/$id'),
+              ),
+            ),
+          ],
+        ),
       ),
-      body: Column(
-        children: [
-          // ── Filter chips ─────────────────────────────────────────────────────
-          _FilterBar(
-            dateFilter: feed.dateFilter,
-            femaleOnly: feed.femaleOnly,
-            onDateTap: () => _pickDate(context),
-            onClearDate: () =>
-                ref.read(ridesFeedProvider.notifier).setDateFilter(null),
-            onFemaleOnlyToggle: (v) =>
-                ref.read(ridesFeedProvider.notifier).setFemaleOnly(v),
-          ),
+    );
+  }
+}
 
-          // ── Feed body ────────────────────────────────────────────────────────
+// ---------------------------------------------------------------------------
+// Header
+// ---------------------------------------------------------------------------
+
+class _HomeHeader extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final auth = ref.watch(authNotifierProvider);
+    final firstName = auth is Authenticated
+        ? auth.user.name.split(' ').first
+        : 'there';
+
+    final hour = DateTime.now().hour;
+    final greeting = hour < 12
+        ? 'Good morning'
+        : hour < 17
+            ? 'Good afternoon'
+            : 'Good evening';
+    final emoji = hour < 12 ? '☀️' : hour < 17 ? '🌤️' : '🌆';
+    final today = DateFormat('EEEE, MMM d').format(DateTime.now());
+
+    final initials = firstName.isNotEmpty ? firstName[0].toUpperCase() : '?';
+
+    return Container(
+      color: AppColors.surface,
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+      child: Row(
+        children: [
           Expanded(
-            child: _FeedBody(
-              feed: feed,
-              scrollController: _scrollController,
-              onRefresh: () =>
-                  ref.read(ridesFeedProvider.notifier).refresh(),
-              onRetry: () =>
-                  ref.read(ridesFeedProvider.notifier).refresh(),
-              onRideTap: (id) => context.push('/rides/$id'),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$greeting $emoji',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  firstName,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                    letterSpacing: -0.5,
+                    height: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  today,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.muted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                initials,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ),
         ],
@@ -96,6 +181,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Filter bar
+// ---------------------------------------------------------------------------
 
 class _FilterBar extends StatelessWidget {
   const _FilterBar({
@@ -120,113 +209,107 @@ class _FilterBar extends StatelessWidget {
 
     return Container(
       color: AppColors.surface,
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
       child: Row(
         children: [
-          // Date chip
-          GestureDetector(
+          _FilterChip(
+            icon: Icons.calendar_month_rounded,
+            label: dateLabel ?? 'Any date',
+            active: dateLabel != null,
+            activeColor: AppColors.primary,
             onTap: onDateTap,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-              decoration: BoxDecoration(
-                color: dateLabel != null
-                    ? AppColors.primary.withValues(alpha: 0.12)
-                    : AppColors.segmentTrack,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: dateLabel != null
-                      ? AppColors.primary
-                      : AppColors.border,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.calendar_today_outlined,
-                    size: 14,
-                    color: dateLabel != null
-                        ? AppColors.primary
-                        : AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    dateLabel ?? 'Any date',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: dateLabel != null
-                          ? AppColors.primary
-                          : AppColors.textSecondary,
-                      fontWeight: dateLabel != null
-                          ? FontWeight.w600
-                          : FontWeight.normal,
+            trailing: dateLabel != null
+                ? GestureDetector(
+                    onTap: onClearDate,
+                    child: const Icon(
+                      Icons.close_rounded,
+                      size: 13,
+                      color: AppColors.primary,
                     ),
-                  ),
-                  if (dateLabel != null) ...[
-                    const SizedBox(width: 6),
-                    GestureDetector(
-                      onTap: onClearDate,
-                      child: const Icon(
-                        Icons.close,
-                        size: 14,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
+                  )
+                : null,
           ),
           const SizedBox(width: 8),
-
-          // Female Only chip
-          GestureDetector(
+          _FilterChip(
+            icon: Icons.female_rounded,
+            label: 'Female only',
+            active: femaleOnly,
+            activeColor: const Color(0xFFDB2777),
             onTap: () => onFemaleOnlyToggle(!femaleOnly),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-              decoration: BoxDecoration(
-                color: femaleOnly
-                    ? const Color(0xFFDB2777).withValues(alpha: 0.1)
-                    : AppColors.segmentTrack,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: femaleOnly
-                      ? const Color(0xFFDB2777)
-                      : AppColors.border,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.female,
-                    size: 14,
-                    color: femaleOnly
-                        ? const Color(0xFFDB2777)
-                        : AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Female only',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: femaleOnly
-                          ? const Color(0xFFDB2777)
-                          : AppColors.textSecondary,
-                      fontWeight: femaleOnly
-                          ? FontWeight.w600
-                          : FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ),
         ],
       ),
     );
   }
 }
+
+class _FilterChip extends StatelessWidget {
+  const _FilterChip({
+    required this.icon,
+    required this.label,
+    required this.active,
+    required this.activeColor,
+    required this.onTap,
+    this.trailing,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool active;
+  final Color activeColor;
+  final VoidCallback onTap;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: active
+              ? activeColor.withValues(alpha: 0.10)
+              : AppColors.background,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: active ? activeColor : AppColors.border,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: active ? activeColor : AppColors.textSecondary,
+            ),
+            const SizedBox(width: 6),
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+                color: active ? activeColor : AppColors.textSecondary,
+              ),
+              child: Text(label),
+            ),
+            if (trailing != null) ...[
+              const SizedBox(width: 4),
+              trailing!,
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Feed body
+// ---------------------------------------------------------------------------
 
 class _FeedBody extends StatelessWidget {
   const _FeedBody({
@@ -245,15 +328,14 @@ class _FeedBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initial skeleton
     if (feed.status == RidesFeedStatus.loading && feed.rides.isEmpty) {
       return ListView.builder(
+        padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
         itemCount: 5,
         itemBuilder: (_, _) => const RideCardSkeleton(),
       );
     }
 
-    // Full-page error (no existing data)
     if (feed.status == RidesFeedStatus.error && feed.rides.isEmpty) {
       return ErrorRetry(
         message: feed.errorMessage ?? 'Failed to load rides.',
@@ -261,14 +343,13 @@ class _FeedBody extends StatelessWidget {
       );
     }
 
-    // Empty state
     if (feed.status == RidesFeedStatus.success && feed.rides.isEmpty) {
       return EmptyState(
         icon: Icons.directions_car_outlined,
         title: 'No rides available',
         subtitle: 'Try a different date or check back later.',
         action: OutlinedButton.icon(
-          icon: const Icon(Icons.refresh),
+          icon: const Icon(Icons.refresh_rounded),
           label: const Text('Refresh'),
           onPressed: () => onRefresh(),
         ),
@@ -276,22 +357,85 @@ class _FeedBody extends StatelessWidget {
     }
 
     return RefreshIndicator(
+      color: AppColors.primary,
       onRefresh: onRefresh,
       child: ListView.builder(
         controller: scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
         itemCount: feed.rides.length + (feed.isLoadingMore ? 1 : 0),
         itemBuilder: (context, index) {
           if (index >= feed.rides.length) {
             return const RideCardSkeleton();
           }
           final ride = feed.rides[index];
-          return RideCard(
-            ride: ride,
-            onTap: () => onRideTap(ride.id),
+          return _AnimatedCard(
+            key: ValueKey(ride.id),
+            index: index,
+            child: RideCard(
+              ride: ride,
+              onTap: () => onRideTap(ride.id),
+            ),
           );
         },
       ),
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// Staggered entrance wrapper
+// ---------------------------------------------------------------------------
+
+class _AnimatedCard extends StatefulWidget {
+  const _AnimatedCard({
+    super.key,
+    required this.index,
+    required this.child,
+  });
+
+  final int index;
+  final Widget child;
+
+  @override
+  State<_AnimatedCard> createState() => _AnimatedCardState();
+}
+
+class _AnimatedCardState extends State<_AnimatedCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 420),
+  );
+  late final Animation<double> _fade =
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
+  late final Animation<Offset> _slide = Tween<Offset>(
+    begin: const Offset(0, 0.12),
+    end: Offset.zero,
+  ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic));
+
+  @override
+  void initState() {
+    super.initState();
+    final delay = Duration(milliseconds: min(widget.index * 65, 320));
+    if (delay == Duration.zero) {
+      _ctrl.forward();
+    } else {
+      Future.delayed(delay, () {
+        if (mounted) _ctrl.forward();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => FadeTransition(
+        opacity: _fade,
+        child: SlideTransition(position: _slide, child: widget.child),
+      );
 }
