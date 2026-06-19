@@ -14,6 +14,7 @@ import '../../features/notifications/presentation/screens/alerts_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/rider/presentation/screens/rider_verification_screen.dart';
 import '../../features/rides/presentation/screens/create_ride_screen.dart';
+import '../../features/rides/presentation/screens/ride_type_screen.dart';
 import '../../features/rides/presentation/screens/my_rides_screen.dart';
 import '../../features/rides/presentation/screens/ride_detail_screen.dart';
 import '../../features/rides/presentation/screens/ride_requests_screen.dart';
@@ -107,6 +108,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, _) => const RiderVerificationScreen(),
       ),
       GoRoute(
+        path: '/ride-create',
+        builder: (_, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final type = extra?['type'] as String? ?? 'OFFER';
+          return CreateRideFormScreen(type: type);
+        },
+      ),
+      GoRoute(
         path: '/rides/:id',
         builder: (_, state) => RideDetailScreen(
           rideId: state.pathParameters['id']!,
@@ -143,7 +152,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/create',
-                builder: (_, _) => const CreateRideScreen(),
+                builder: (_, _) => const RideTypeScreen(),
               ),
             ],
           ),

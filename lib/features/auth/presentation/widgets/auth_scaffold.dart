@@ -57,7 +57,7 @@ class _AuthScaffoldState extends State<AuthScaffold>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.dark,
+      backgroundColor: AppColors.black,
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         bottom: false,
@@ -115,7 +115,7 @@ class _AuthScaffoldState extends State<AuthScaffold>
                   child: Container(
                     width: double.infinity,
                     decoration: const BoxDecoration(
-                      color: AppColors.surface,
+                      color: AppColors.lightSurface,
                       borderRadius:
                           BorderRadius.vertical(top: Radius.circular(28)),
                     ),

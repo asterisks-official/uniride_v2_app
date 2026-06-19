@@ -26,7 +26,7 @@ class TrustScoreRing extends StatelessWidget {
         children: [
           CircularProgressIndicator(
             value: score / 100,
-            backgroundColor: AppColors.border,
+            backgroundColor: AppColors.lightBorder,
             valueColor: AlwaysStoppedAnimation(_color),
             strokeWidth: 3,
           ),

@@ -95,14 +95,14 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
             TextSpan(
               text: 'Enter the 6-digit verification code we sent to ',
               style: const TextStyle(
-                color: AppColors.textSecondary,
+                color: AppColors.lightTextSecondary,
                 height: 1.4,
               ),
               children: [
                 TextSpan(
                   text: widget.email ?? 'your email',
                   style: const TextStyle(
-                    color: AppColors.textPrimary,
+                    color: AppColors.lightTextPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -114,7 +114,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
             const SizedBox(height: 8),
             Text(
               'Dev OTP: ${widget.devOtp}',
-              style: const TextStyle(color: AppColors.muted, fontSize: 12),
+              style: const TextStyle(color: AppColors.lightMuted, fontSize: 12),
             ),
           ],
           const SizedBox(height: 28),
@@ -129,7 +129,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
             _secondsLeft > 0
                 ? 'Resend code in ${_secondsLeft}s'
                 : 'Code not received? Re-register to get a new one.',
-            style: const TextStyle(color: AppColors.muted, fontSize: 13),
+            style: const TextStyle(color: AppColors.lightMuted, fontSize: 13),
             textAlign: TextAlign.center,
           ),
         ],
@@ -153,12 +153,12 @@ class _VerifyBadge extends StatelessWidget {
             width: 96,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.segmentTrack,
+              color: AppColors.lightSegmentTrack,
             ),
             child: const Icon(
               Icons.person_outline,
               size: 48,
-              color: AppColors.muted,
+              color: AppColors.lightMuted,
             ),
           ),
           Positioned(

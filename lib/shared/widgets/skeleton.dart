@@ -52,7 +52,7 @@ class _SkeletonBoxState extends State<SkeletonBox>
         height: widget.height,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(widget.borderRadius),
-          color: AppColors.border.withValues(alpha: _anim.value),
+          color: AppColors.lightBorder.withValues(alpha: _anim.value),
         ),
       ),
     );
@@ -69,7 +69,7 @@ class RideCardSkeleton extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.lightSurface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -119,7 +119,7 @@ class RideCardSkeleton extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          const Divider(color: AppColors.border, height: 1),
+          const Divider(color: AppColors.lightBorder, height: 1),
           const SizedBox(height: 12),
           // Info chips
           Row(
@@ -137,84 +137,91 @@ class RideCardSkeleton extends StatelessWidget {
   }
 }
 
-/// A skeleton that mimics the ride detail screen layout.
+/// A skeleton that mimics the ride detail screen layout (hero header + cards).
 class RideDetailSkeleton extends StatelessWidget {
   const RideDetailSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Rider card
-          Container(
+    final topPad = MediaQuery.of(context).padding.top;
+    return Column(
+      children: [
+        // Hero header skeleton
+        Container(
+          height: 210 + topPad,
+          color: AppColors.black,
+          padding: EdgeInsets.fromLTRB(20, topPad + 60, 20, 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              SkeletonBox(width: 200, height: 14, borderRadius: 7),
+              SizedBox(height: 20),
+              SkeletonBox(width: 160, height: 13, borderRadius: 7),
+            ],
+          ),
+        ),
+
+        // Body skeletons
+        Expanded(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SkeletonBox(width: 56, height: 56, borderRadius: 28),
-                const SizedBox(width: 14),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                // Status pill
+                const SkeletonBox(width: 160, height: 36, borderRadius: 12),
+                const SizedBox(height: 16),
+
+                // Rider card
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.lightSurface,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: const Row(
                     children: [
-                      SkeletonBox(width: 130, height: 16),
-                      SizedBox(height: 8),
-                      SkeletonBox(width: 90, height: 12),
+                      SkeletonBox(width: 60, height: 60, borderRadius: 30),
+                      SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SkeletonBox(width: 130, height: 16),
+                            SizedBox(height: 8),
+                            SkeletonBox(width: 100, height: 12),
+                          ],
+                        ),
+                      ),
+                      SkeletonBox(width: 42, height: 42, borderRadius: 21),
                     ],
                   ),
                 ),
-                const SkeletonBox(width: 40, height: 40, borderRadius: 20),
+                const SizedBox(height: 12),
+
+                // Trip details card
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.lightSurface,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: const Column(
+                    children: [
+                      SkeletonBox(width: double.infinity, height: 40, borderRadius: 8),
+                      SizedBox(height: 12),
+                      SkeletonBox(width: double.infinity, height: 40, borderRadius: 8),
+                      SizedBox(height: 12),
+                      SkeletonBox(width: double.infinity, height: 40, borderRadius: 8),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
-          const SizedBox(height: 20),
-
-          // Section: Route
-          const SkeletonBox(width: 50, height: 12),
-          const SizedBox(height: 10),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SkeletonBox(width: double.infinity, height: 14),
-                SizedBox(height: 12),
-                SkeletonBox(width: 200, height: 14),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          // Section: Details
-          const SkeletonBox(width: 60, height: 12),
-          const SizedBox(height: 10),
-          const Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              SkeletonBox(width: 140, height: 34, borderRadius: 20),
-              SkeletonBox(width: 80, height: 34, borderRadius: 20),
-              SkeletonBox(width: 90, height: 34, borderRadius: 20),
-            ],
-          ),
-          const SizedBox(height: 28),
-
-          // CTA button
-          const SkeletonBox(width: double.infinity, height: 48, borderRadius: 12),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -229,9 +236,9 @@ class RequestCardSkeleton extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.lightSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.lightBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

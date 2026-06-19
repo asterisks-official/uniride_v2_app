@@ -9,7 +9,7 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.lightBackground,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -29,7 +29,7 @@ class SplashScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: AppColors.lightTextPrimary,
                 letterSpacing: -0.5,
               ),
             ),

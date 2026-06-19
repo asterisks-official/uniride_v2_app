@@ -26,7 +26,7 @@ class ErrorRetry extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: AppColors.textSecondary,
+                color: AppColors.lightTextSecondary,
                 height: 1.4,
               ),
             ),

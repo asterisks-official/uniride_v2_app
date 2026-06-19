@@ -14,7 +14,7 @@ class AuthTabs extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
-        color: AppColors.segmentTrack,
+        color: AppColors.lightSegmentTrack,
         borderRadius: BorderRadius.circular(30),
       ),
       child: Row(
@@ -36,7 +36,7 @@ class AuthTabs extends StatelessWidget {
           duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: active ? AppColors.surface : Colors.transparent,
+            color: active ? AppColors.lightSurface : Colors.transparent,
             borderRadius: BorderRadius.circular(26),
             boxShadow: active
                 ? [
@@ -54,7 +54,7 @@ class AuthTabs extends StatelessWidget {
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: active ? AppColors.textPrimary : AppColors.muted,
+                color: active ? AppColors.lightTextPrimary : AppColors.lightMuted,
               ),
             ),
           ),

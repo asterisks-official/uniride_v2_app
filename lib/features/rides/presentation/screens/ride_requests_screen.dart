@@ -74,7 +74,7 @@ class _RideRequestsScreenState extends ConsumerState<RideRequestsScreen> {
     final async = ref.watch(rideRequestsProvider(widget.rideId));
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.lightBackground,
       appBar: AppBar(
         title: async.when(
           data: (reqs) => Column(
@@ -87,7 +87,7 @@ class _RideRequestsScreenState extends ConsumerState<RideRequestsScreen> {
                   '${reqs.length} pending',
                   style: const TextStyle(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: AppColors.lightTextSecondary,
                     fontWeight: FontWeight.normal,
                   ),
                 ),
@@ -324,9 +324,9 @@ class _RequestCardContent extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.lightSurface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.lightBorder),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -359,7 +359,7 @@ class _RequestCardContent extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                                color: AppColors.lightTextPrimary,
                               ),
                             ),
                             const SizedBox(height: 5),
@@ -378,7 +378,7 @@ class _RequestCardContent extends StatelessWidget {
                                   style: const TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary,
+                                    color: AppColors.lightTextPrimary,
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -388,7 +388,7 @@ class _RequestCardContent extends StatelessWidget {
                                   '$rides rides',
                                   style: const TextStyle(
                                     fontSize: 13,
-                                    color: AppColors.textSecondary,
+                                    color: AppColors.lightTextSecondary,
                                   ),
                                 ),
                               ],
@@ -408,9 +408,9 @@ class _RequestCardContent extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 11),
                       decoration: BoxDecoration(
-                        color: AppColors.background,
+                        color: AppColors.lightBackground,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.border),
+                        border: Border.all(color: AppColors.lightBorder),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -418,7 +418,7 @@ class _RequestCardContent extends StatelessWidget {
                           const Icon(
                             Icons.format_quote_rounded,
                             size: 16,
-                            color: AppColors.muted,
+                            color: AppColors.lightMuted,
                           ),
                           const SizedBox(width: 6),
                           Expanded(
@@ -426,7 +426,7 @@ class _RequestCardContent extends StatelessWidget {
                               request.message!,
                               style: const TextStyle(
                                 fontSize: 13.5,
-                                color: AppColors.textSecondary,
+                                color: AppColors.lightTextSecondary,
                                 fontStyle: FontStyle.italic,
                                 height: 1.45,
                               ),
@@ -444,16 +444,16 @@ class _RequestCardContent extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
                       Icon(Icons.chevron_left,
-                          size: 13, color: AppColors.muted),
+                          size: 13, color: AppColors.lightMuted),
                       SizedBox(width: 3),
                       Text(
                         'Swipe or tap to decide',
                         style:
-                            TextStyle(fontSize: 11, color: AppColors.muted),
+                            TextStyle(fontSize: 11, color: AppColors.lightMuted),
                       ),
                       SizedBox(width: 3),
                       Icon(Icons.chevron_right,
-                          size: 13, color: AppColors.muted),
+                          size: 13, color: AppColors.lightMuted),
                     ],
                   ),
 
@@ -503,7 +503,7 @@ class _RequestCardContent extends StatelessWidget {
                   duration: const Duration(milliseconds: 180),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: AppColors.surface.withValues(alpha: 0.75),
+                      color: AppColors.lightSurface.withValues(alpha: 0.75),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Center(
@@ -618,7 +618,7 @@ class _PassengerAvatar extends StatelessWidget {
       ),
       child: CircleAvatar(
         radius: radius,
-        backgroundColor: AppColors.segmentTrack,
+        backgroundColor: AppColors.lightSegmentTrack,
         backgroundImage:
             url != null ? CachedNetworkImageProvider(url!) : null,
         child: url == null
@@ -627,7 +627,7 @@ class _PassengerAvatar extends StatelessWidget {
                 style: TextStyle(
                   fontSize: radius * 0.65,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: AppColors.lightTextPrimary,
                 ),
               )
             : null,
@@ -644,7 +644,7 @@ class _Dot extends StatelessWidget {
         width: 3,
         height: 3,
         decoration: const BoxDecoration(
-          color: AppColors.muted,
+          color: AppColors.lightMuted,
           shape: BoxShape.circle,
         ),
       );

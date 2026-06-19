@@ -50,15 +50,15 @@ class OrDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Expanded(child: Divider(color: AppColors.border)),
+        const Expanded(child: Divider(color: AppColors.lightBorder)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Text(
             label,
-            style: const TextStyle(color: AppColors.muted, fontSize: 13),
+            style: const TextStyle(color: AppColors.lightMuted, fontSize: 13),
           ),
         ),
-        const Expanded(child: Divider(color: AppColors.border)),
+        const Expanded(child: Divider(color: AppColors.lightBorder)),
       ],
     );
   }

@@ -85,7 +85,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     child: TextButton(
                       onPressed: _isLast ? null : _finish,
                       style: TextButton.styleFrom(
-                        foregroundColor: AppColors.textSecondary,
+                        foregroundColor: AppColors.lightTextSecondary,
                       ),
                       child: const Text('Skip'),
                     ),
@@ -164,7 +164,7 @@ class _PageContent extends StatelessWidget {
             style: const TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: AppColors.lightTextPrimary,
               height: 1.2,
               letterSpacing: -0.5,
             ),
@@ -175,7 +175,7 @@ class _PageContent extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 16,
-              color: AppColors.textSecondary,
+              color: AppColors.lightTextSecondary,
               height: 1.6,
             ),
           ),
@@ -212,7 +212,7 @@ class _DotsIndicator extends StatelessWidget {
           width: active ? 26 : 8,
           height: 8,
           decoration: BoxDecoration(
-            color: active ? color : AppColors.border,
+            color: active ? color : AppColors.lightBorder,
             borderRadius: BorderRadius.circular(4),
           ),
         );
@@ -244,10 +244,10 @@ class _NextButton extends StatelessWidget {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
         height: 52,
-        padding: EdgeInsets.symmetric(horizontal: isLast ? 24 : 16),
+        padding: EdgeInsets.symmetric(horizontal: isLast ? 24 : 20),
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(26),
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
               color: color.withValues(alpha: 0.35),

@@ -39,7 +39,7 @@ class _AuthTextFieldState extends State<AuthTextField>
     duration: const Duration(milliseconds: 200),
   );
   late final Animation<Color?> _iconColor = ColorTween(
-    begin: AppColors.muted,
+    begin: AppColors.lightMuted,
     end: AppColors.primary,
   ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
 
@@ -87,7 +87,7 @@ class _AuthTextFieldState extends State<AuthTextField>
               ? IconButton(
                   icon: Icon(
                     _obscured ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                    color: AppColors.muted,
+                    color: AppColors.lightMuted,
                     size: 20,
                   ),
                   onPressed: () => setState(() => _obscured = !_obscured),

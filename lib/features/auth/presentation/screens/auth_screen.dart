@@ -147,6 +147,7 @@ class _LoginFormState extends ConsumerState<_LoginForm> {
           AuthTextField(
             controller: _email,
             label: 'Email Address',
+            hint: 'e.g. you@university.edu',
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
             prefixIcon: Icons.mail_outline_rounded,
@@ -157,6 +158,7 @@ class _LoginFormState extends ConsumerState<_LoginForm> {
           AuthTextField(
             controller: _password,
             label: 'Password',
+            hint: 'Enter your password',
             obscureText: true,
             textInputAction: TextInputAction.done,
             prefixIcon: Icons.lock_outline_rounded,
@@ -207,7 +209,7 @@ class _RememberForgotRow extends StatelessWidget {
                   color: rememberMe ? AppColors.primary : Colors.transparent,
                   borderRadius: BorderRadius.circular(5),
                   border: Border.all(
-                    color: rememberMe ? AppColors.primary : AppColors.border,
+                    color: rememberMe ? AppColors.primary : AppColors.lightBorder,
                     width: 1.5,
                   ),
                 ),
@@ -224,7 +226,7 @@ class _RememberForgotRow extends StatelessWidget {
                 'Remember me',
                 style: TextStyle(
                   fontSize: 14,
-                  color: AppColors.textSecondary,
+                  color: AppColors.lightTextSecondary,
                 ),
               ),
             ],
@@ -311,6 +313,7 @@ class _RegisterFormState extends ConsumerState<_RegisterForm> {
           AuthTextField(
             controller: _name,
             label: 'Full Name',
+            hint: 'e.g. Shakib Howlader',
             textInputAction: TextInputAction.next,
             prefixIcon: Icons.person_outline_rounded,
             validator: (v) =>
@@ -320,6 +323,7 @@ class _RegisterFormState extends ConsumerState<_RegisterForm> {
           AuthTextField(
             controller: _email,
             label: 'Email Address',
+            hint: 'e.g. you@university.edu',
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
             prefixIcon: Icons.mail_outline_rounded,
@@ -330,6 +334,7 @@ class _RegisterFormState extends ConsumerState<_RegisterForm> {
           AuthTextField(
             controller: _university,
             label: 'University (optional)',
+            hint: 'e.g. BUET, NSU, BRAC University',
             textInputAction: TextInputAction.next,
             prefixIcon: Icons.school_outlined,
           ),
@@ -337,6 +342,7 @@ class _RegisterFormState extends ConsumerState<_RegisterForm> {
           AuthTextField(
             controller: _phone,
             label: 'Phone (optional)',
+            hint: 'e.g. 01XXXXXXXXX',
             keyboardType: TextInputType.phone,
             textInputAction: TextInputAction.next,
             prefixIcon: Icons.phone_outlined,
@@ -345,6 +351,7 @@ class _RegisterFormState extends ConsumerState<_RegisterForm> {
           AuthTextField(
             controller: _password,
             label: 'Password',
+            hint: 'Min. 8 characters',
             obscureText: true,
             textInputAction: TextInputAction.done,
             prefixIcon: Icons.lock_outline_rounded,
@@ -359,7 +366,7 @@ class _RegisterFormState extends ConsumerState<_RegisterForm> {
             child: Text(
               "We'll email you a 6-digit code to verify your account.",
               style: TextStyle(
-                color: AppColors.muted,
+                color: AppColors.lightMuted,
                 fontSize: 12,
                 height: 1.45,
               ),

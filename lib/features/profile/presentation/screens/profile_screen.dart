@@ -20,7 +20,7 @@ class ProfileScreen extends ConsumerWidget {
     final profileAsync = ref.watch(profileNotifierProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.lightBackground,
       body: profileAsync.when(
         loading: () => const _ProfileSkeleton(),
         error: (e, _) => SafeArea(
@@ -50,7 +50,7 @@ class _ProfileSkeleton extends StatelessWidget {
           Container(
             margin: EdgeInsets.fromLTRB(20, top + 16, 20, 0),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: AppColors.lightSurface,
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
@@ -280,7 +280,7 @@ class _ProfileHero extends StatelessWidget {
     return Container(
       margin: EdgeInsets.fromLTRB(20, top + 16, 20, 0),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.lightSurface,
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
@@ -355,7 +355,7 @@ class _ProfileHero extends StatelessWidget {
                       child: const Icon(
                         Icons.camera_alt_rounded,
                         size: 16,
-                        color: AppColors.textSecondary,
+                        color: AppColors.lightTextSecondary,
                       ),
                     ),
                   ),
@@ -377,7 +377,7 @@ class _ProfileHero extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                            color: AppColors.lightTextPrimary,
                             letterSpacing: -0.5,
                             height: 1.1,
                           ),
@@ -401,7 +401,7 @@ class _ProfileHero extends StatelessWidget {
                             ? Icons.school_rounded
                             : Icons.mail_outline_rounded,
                         size: 13,
-                        color: AppColors.muted,
+                        color: AppColors.lightMuted,
                       ),
                       const SizedBox(width: 5),
                       Expanded(
@@ -411,7 +411,7 @@ class _ProfileHero extends StatelessWidget {
                               : profile.email,
                           style: const TextStyle(
                             fontSize: 13,
-                            color: AppColors.muted,
+                            color: AppColors.lightMuted,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -500,7 +500,7 @@ class _StatCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.fromLTRB(14, 16, 14, 16),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: AppColors.lightSurface,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -528,7 +528,7 @@ class _StatCard extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
-                color: AppColors.textPrimary,
+                color: AppColors.lightTextPrimary,
                 letterSpacing: -0.8,
                 height: 1,
               ),
@@ -538,7 +538,7 @@ class _StatCard extends StatelessWidget {
               label,
               style: const TextStyle(
                 fontSize: 12,
-                color: AppColors.muted,
+                color: AppColors.lightMuted,
                 fontWeight: FontWeight.w400,
               ),
             ),
@@ -559,7 +559,7 @@ class _TrustCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.fromLTRB(14, 16, 14, 16),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: AppColors.lightSurface,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -579,7 +579,7 @@ class _TrustCard extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
-                color: AppColors.textPrimary,
+                color: AppColors.lightTextPrimary,
                 letterSpacing: -0.8,
                 height: 1,
               ),
@@ -589,7 +589,7 @@ class _TrustCard extends StatelessWidget {
               'Trust',
               style: TextStyle(
                 fontSize: 12,
-                color: AppColors.muted,
+                color: AppColors.lightMuted,
                 fontWeight: FontWeight.w400,
               ),
             ),
@@ -610,7 +610,7 @@ class _ActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.lightSurface,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -630,7 +630,7 @@ class _ActionCard extends StatelessWidget {
                 const Divider(
                   height: 1,
                   indent: 68,
-                  color: AppColors.border,
+                  color: AppColors.lightBorder,
                 ),
             ],
           ],
@@ -674,7 +674,7 @@ class _ActionItemState extends State<_ActionItem> {
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 100),
-        color: _pressed ? AppColors.background : AppColors.surface,
+        color: _pressed ? AppColors.lightBackground : AppColors.lightSurface,
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         child: Row(
           children: [
@@ -698,14 +698,14 @@ class _ActionItemState extends State<_ActionItem> {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: widget.labelColor ?? AppColors.textPrimary,
+                  color: widget.labelColor ?? AppColors.lightTextPrimary,
                 ),
               ),
             ),
             Icon(
               Icons.arrow_forward_ios_rounded,
               size: 14,
-              color: AppColors.muted.withValues(alpha: 0.6),
+              color: AppColors.lightMuted.withValues(alpha: 0.6),
             ),
           ],
         ),

@@ -84,7 +84,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 onPressed: () => context.go('/login'),
                 child: const Text(
                   'Back to login',
-                  style: TextStyle(color: AppColors.textSecondary),
+                  style: TextStyle(color: AppColors.lightTextSecondary),
                 ),
               ),
             ),

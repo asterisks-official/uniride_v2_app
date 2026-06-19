@@ -88,10 +88,10 @@ class _OtpInputState extends State<OtpInput> {
       height: 56,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: AppColors.segmentTrack,
+        color: AppColors.lightSegmentTrack,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isNext ? AppColors.primary : AppColors.border,
+          color: isNext ? AppColors.primary : AppColors.lightBorder,
           width: isNext ? 1.5 : 1,
         ),
       ),
@@ -100,7 +100,7 @@ class _OtpInputState extends State<OtpInput> {
         style: const TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
+          color: AppColors.lightTextPrimary,
         ),
       ),
     );

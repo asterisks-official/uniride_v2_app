@@ -72,7 +72,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             if (widget.devOtp != null) ...[
               Text(
                 'Dev OTP: ${widget.devOtp}',
-                style: const TextStyle(color: AppColors.muted, fontSize: 12),
+                style: const TextStyle(color: AppColors.lightMuted, fontSize: 12),
               ),
               const SizedBox(height: 12),
             ],

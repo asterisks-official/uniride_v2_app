@@ -91,12 +91,12 @@ class _RiderStatus extends ConsumerWidget {
             Text(
               body,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.textSecondary),
+              style: const TextStyle(color: AppColors.lightTextSecondary),
             ),
             const SizedBox(height: 24),
             Text(
               '${profile.vehicleMake} ${profile.vehicleModel} · ${profile.licensePlate}',
-              style: const TextStyle(color: AppColors.muted),
+              style: const TextStyle(color: AppColors.lightMuted),
             ),
             const SizedBox(height: 24),
             if (status == 'APPROVED' && !isRider)
@@ -214,7 +214,7 @@ class _RiderFormState extends ConsumerState<_RiderForm> {
             const Text(
               'Tell us about your vehicle and upload your documents. An admin '
               'will review and approve your application.',
-              style: TextStyle(color: AppColors.textSecondary, height: 1.4),
+              style: TextStyle(color: AppColors.lightTextSecondary, height: 1.4),
             ),
             const SizedBox(height: 20),
             DropdownButtonFormField<String>(
@@ -315,17 +315,17 @@ class _UploadTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: AppColors.segmentTrack,
+          color: AppColors.lightSegmentTrack,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: picked ? AppColors.primary : AppColors.border,
+            color: picked ? AppColors.primary : AppColors.lightBorder,
           ),
         ),
         child: Row(
           children: [
             Icon(
               picked ? Icons.check_circle : Icons.upload_file,
-              color: picked ? AppColors.primary : AppColors.muted,
+              color: picked ? AppColors.primary : AppColors.lightMuted,
             ),
             const SizedBox(width: 12),
             Expanded(

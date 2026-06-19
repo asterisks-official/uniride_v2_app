@@ -59,7 +59,7 @@ class _BottomNavBar extends StatelessWidget {
     final bottomInset = MediaQuery.of(context).padding.bottom;
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.lightSurface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.07),
@@ -141,7 +141,7 @@ class _NavItem extends StatelessWidget {
               child: Icon(
                 icon,
                 size: 23,
-                color: selected ? AppColors.primary : AppColors.muted,
+                color: selected ? AppColors.primary : AppColors.lightMuted,
               ),
             ),
             const SizedBox(height: 3),
@@ -152,7 +152,7 @@ class _NavItem extends StatelessWidget {
                 height: 1,
                 letterSpacing: 0.1,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                color: selected ? AppColors.primary : AppColors.muted,
+                color: selected ? AppColors.primary : AppColors.lightMuted,
               ),
               child: Text(label),
             ),
