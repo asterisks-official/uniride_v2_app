@@ -194,7 +194,10 @@ class _DetailView extends StatelessWidget {
   final VoidCallback onConfirmRide;
 
   bool get _isRider => currentUserId != null && currentUserId == ride.riderId;
-  bool get _showWaiting => _isRider && ride.status == 'SEARCHING';
+  // The post owner manages the ride (and sees the waiting screen) regardless of
+  // whether they posted as a driver (OFFER) or a passenger (REQUEST).
+  bool get _isOwner => currentUserId != null && currentUserId == ride.creator.id;
+  bool get _showWaiting => _isOwner && ride.status == 'SEARCHING';
 
   @override
   Widget build(BuildContext context) {
@@ -923,7 +926,8 @@ class _RiderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rider = ride.rider;
+    // Show the matched driver if present, otherwise the person who posted.
+    final rider = ride.rider ?? ride.poster;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1532,15 +1536,21 @@ class _PassengerActions extends StatelessWidget {
       );
     }
 
+    // On a REQUEST post the viewer is a driver offering to fulfil it; on an
+    // OFFER post the viewer is a passenger asking to join.
+    final isRequestPost = ride.type == 'REQUEST';
+
     switch (ride.status) {
       case 'SEARCHING':
         return SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
-            icon: const Icon(Icons.hail_rounded),
+            icon: Icon(isRequestPost
+                ? Icons.directions_bike_rounded
+                : Icons.hail_rounded),
             label: joining
                 ? const _Spinner(color: Colors.white)
-                : const Text('Request to Join'),
+                : Text(isRequestPost ? 'Offer to Drive' : 'Request to Join'),
             onPressed: joining ? null : onJoin,
           ),
         );

@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/empty_state.dart';
@@ -14,6 +13,9 @@ import '../../../auth/presentation/providers/auth_notifier.dart';
 import '../../../rides/domain/models/ride.dart';
 import '../../../rides/presentation/providers/my_rides_notifier.dart';
 import '../../../rides/presentation/providers/rides_feed_notifier.dart';
+
+// Charcoal (from theme's lightTextPrimary) — used for headings and the avatar.
+const _charcoal = Color(0xFF111827);
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -44,74 +46,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  Future<void> _pickDate(BuildContext context) async {
-    final notifier = ref.read(ridesFeedProvider.notifier);
-    final current = ref.read(ridesFeedProvider).dateFilter;
-    final initial =
-        current != null ? DateTime.parse(current) : DateTime.now();
-
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: initial,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 30)),
-    );
-
-    if (!context.mounted) return;
-    if (picked != null) {
-      notifier.setDateFilter(DateFormat('yyyy-MM-dd').format(picked));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final feed = ref.watch(ridesFeedProvider);
+    final auth = ref.watch(authNotifierProvider);
+    final isRider = auth is Authenticated && auth.user.role == 'RIDER';
 
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            _HomeHeader(),
-            const _ActiveRideBanner(),
-            _FilterBar(
-              dateFilter: feed.dateFilter,
-              femaleOnly: feed.femaleOnly,
-              onDateTap: () => _pickDate(context),
-              onClearDate: () =>
-                  ref.read(ridesFeedProvider.notifier).setDateFilter(null),
-              onFemaleOnlyToggle: (v) =>
-                  ref.read(ridesFeedProvider.notifier).setFemaleOnly(v),
+      body: Column(
+        children: [
+          _HomeHeader(isRider: isRider),
+          const _ActiveRideBanner(),
+          _FeedSectionHeader(count: feed.rides.length, isRider: isRider),
+          Expanded(
+            child: _FeedBody(
+              feed: feed,
+              isRider: isRider,
+              scrollController: _scrollController,
+              onRefresh: () => ref.read(ridesFeedProvider.notifier).refresh(),
+              onRetry: () => ref.read(ridesFeedProvider.notifier).refresh(),
+              onRideTap: (id) => context.push('/rides/$id'),
             ),
-            Expanded(
-              child: _FeedBody(
-                feed: feed,
-                scrollController: _scrollController,
-                onRefresh: () =>
-                    ref.read(ridesFeedProvider.notifier).refresh(),
-                onRetry: () =>
-                    ref.read(ridesFeedProvider.notifier).refresh(),
-                onRideTap: (id) => context.push('/rides/$id'),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// Header
+// Charcoal header — greeting + avatar
 // ---------------------------------------------------------------------------
 
 class _HomeHeader extends ConsumerWidget {
+  const _HomeHeader({required this.isRider});
+  final bool isRider;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final topPad = MediaQuery.of(context).padding.top;
     final auth = ref.watch(authNotifierProvider);
     final firstName =
         auth is Authenticated ? auth.user.name.split(' ').first : 'there';
+    final initials = firstName.isNotEmpty ? firstName[0].toUpperCase() : '?';
 
     final hour = DateTime.now().hour;
     final greeting = hour < 12
@@ -119,12 +97,9 @@ class _HomeHeader extends ConsumerWidget {
         : hour < 17
             ? 'Good afternoon'
             : 'Good evening';
-    final today = DateFormat('EEEE, MMM d').format(DateTime.now());
-    final initials = firstName.isNotEmpty ? firstName[0].toUpperCase() : '?';
 
-    return Container(
-      color: AppColors.lightSurface,
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20, topPad + 16, 16, 4),
       child: Row(
         children: [
           Expanded(
@@ -134,10 +109,9 @@ class _HomeHeader extends ConsumerWidget {
                 Text(
                   greeting,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
                     color: AppColors.lightTextSecondary,
-                    fontWeight: FontWeight.w400,
-                    letterSpacing: 0.2,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -146,26 +120,34 @@ class _HomeHeader extends ConsumerWidget {
                   style: const TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.lightTextPrimary,
-                    letterSpacing: -0.8,
-                    height: 1.1,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  today,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.lightMuted,
+                    color: _charcoal,
+                    letterSpacing: -0.6,
+                    height: 1.05,
                   ),
                 ),
               ],
             ),
           ),
-          // Profile avatar
           GestureDetector(
             onTap: () => context.go('/profile'),
-            child: _InitialsAvatar(initials: initials),
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: _charcoal,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Center(
+                child: Text(
+                  initials,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -173,28 +155,8 @@ class _HomeHeader extends ConsumerWidget {
   }
 }
 
-class _InitialsAvatar extends StatelessWidget {
-  const _InitialsAvatar({required this.initials});
-  final String initials;
-
-  @override
-  Widget build(BuildContext context) => Container(
-        color: AppColors.primary,
-        child: Center(
-          child: Text(
-            initials,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-      );
-}
-
 // ---------------------------------------------------------------------------
-// Active ride banner — resumes an in-flight ride from anywhere
+// Active ride banner
 // ---------------------------------------------------------------------------
 
 class _ActiveRideBanner extends ConsumerWidget {
@@ -216,7 +178,7 @@ class _ActiveRideBanner extends ConsumerWidget {
           ? const SizedBox.shrink(key: ValueKey('none'))
           : Padding(
               key: ValueKey(ride.id),
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
               child: _ActiveRideCard(
                 ride: ride,
                 onTap: () async {
@@ -229,120 +191,241 @@ class _ActiveRideBanner extends ConsumerWidget {
   }
 }
 
-class _ActiveRideCard extends StatelessWidget {
+class _ActiveRideCard extends StatefulWidget {
   const _ActiveRideCard({required this.ride, required this.onTap});
 
   final Ride ride;
   final VoidCallback onTap;
 
-  ({String label, IconData icon, List<Color> gradient, bool live}) get _meta =>
-      switch (ride.status) {
-        'IN_PROGRESS' => (
-            label: 'Ride in progress',
-            icon: Icons.directions_bike_rounded,
-            gradient: const [Color(0xFF6366F1), Color(0xFF4F46E5)],
-            live: true,
-          ),
-        'MATCHED' => (
-            label: 'Matched — tap to view',
-            icon: Icons.people_alt_rounded,
-            gradient: const [AppColors.secondary, Color(0xFF16A34A)],
-            live: true,
-          ),
-        _ => (
-            label: 'Finding your match',
-            icon: Icons.radar_rounded,
-            gradient: const [AppColors.primary, AppColors.primaryDark],
-            live: true,
-          ),
-      };
+  @override
+  State<_ActiveRideCard> createState() => _ActiveRideCardState();
+}
+
+class _ActiveRideCardState extends State<_ActiveRideCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _anim = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2400),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _anim.dispose();
+    super.dispose();
+  }
+
+  ({String label, IconData icon, List<Color> gradient, bool searching})
+      get _meta => switch (widget.ride.status) {
+            'IN_PROGRESS' => (
+                label: 'Ride in progress',
+                icon: Icons.directions_bike_rounded,
+                gradient: const [Color(0xFF6366F1), Color(0xFF4F46E5)],
+                searching: false,
+              ),
+            'MATCHED' => (
+                label: 'Matched — tap to view',
+                icon: Icons.people_alt_rounded,
+                gradient: const [AppColors.secondary, Color(0xFF16A34A)],
+                searching: false,
+              ),
+            _ => (
+                label: 'Finding your match',
+                icon: Icons.radar_rounded,
+                gradient: const [AppColors.primary, AppColors.primaryDark],
+                searching: true,
+              ),
+          };
 
   @override
   Widget build(BuildContext context) {
     final m = _meta;
+    final ride = widget.ride;
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Container(
-        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: m.gradient,
-          ),
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: m.gradient.last.withValues(alpha: 0.30),
+              color: m.gradient.last.withValues(alpha: 0.28),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),
           ],
         ),
-        child: Row(
-          children: [
-            // Icon badge
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.18),
-                borderRadius: BorderRadius.circular(14),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: m.gradient,
               ),
-              child: Icon(m.icon, color: Colors.white, size: 22),
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      if (m.live) ...[
-                        const _LiveDot(),
-                        const SizedBox(width: 7),
-                      ],
-                      Flexible(
-                        child: Text(
-                          m.label,
-                          style: const TextStyle(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                            letterSpacing: -0.2,
+            child: Stack(
+              children: [
+                // Sweeping scan/shine across the card.
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: AnimatedBuilder(
+                      animation: _anim,
+                      builder: (_, _) {
+                        final t = _anim.value;
+                        return DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment(-1.4 + 2.8 * t, -0.4),
+                              end: Alignment(-1.0 + 2.8 * t, 0.4),
+                              colors: [
+                                Colors.transparent,
+                                Colors.white.withValues(alpha: 0.16),
+                                Colors.transparent,
+                              ],
+                              stops: const [0.0, 0.5, 1.0],
+                            ),
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Row(
+                    children: [
+                      _AnimatedIconBadge(
+                        icon: m.icon,
+                        anim: _anim,
+                        searching: m.searching,
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const _LiveDot(),
+                                const SizedBox(width: 7),
+                                Flexible(
+                                  child: Text(
+                                    m.label,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                      letterSpacing: -0.2,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              '${ride.originAddress} → ${ride.destAddress}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white.withValues(alpha: 0.85),
+                                height: 1.3,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      Icon(Icons.chevron_right_rounded,
+                          color: Colors.white.withValues(alpha: 0.7),
+                          size: 22),
                     ],
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    '${ride.originAddress} → ${ride.destAddress}',
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      color: Colors.white.withValues(alpha: 0.85),
-                      height: 1.3,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            const Icon(Icons.chevron_right_rounded,
-                color: Colors.white, size: 24),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-// Pulsing white dot for the "live" indicator.
+// Icon badge with an expanding pulse ring (radar feel while searching).
+class _AnimatedIconBadge extends StatelessWidget {
+  const _AnimatedIconBadge({
+    required this.icon,
+    required this.anim,
+    required this.searching,
+  });
+
+  final IconData icon;
+  final Animation<double> anim;
+  final bool searching;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 44,
+      height: 44,
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          // Expanding pulse rings.
+          AnimatedBuilder(
+            animation: anim,
+            builder: (_, _) {
+              return Stack(
+                alignment: Alignment.center,
+                children: List.generate(2, (i) {
+                  final t = (anim.value + i / 2) % 1.0;
+                  return Opacity(
+                    opacity: (1.0 - t) * 0.45,
+                    child: Container(
+                      width: 30 + t * 26,
+                      height: 30 + t * 26,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          width: 1.4,
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              );
+            },
+          ),
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: searching
+                ? AnimatedBuilder(
+                    animation: anim,
+                    builder: (_, child) => Transform.rotate(
+                      angle: anim.value * 6.2831853,
+                      child: child,
+                    ),
+                    child: Icon(icon, color: Colors.white, size: 21),
+                  )
+                : Icon(icon, color: Colors.white, size: 21),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _LiveDot extends StatefulWidget {
   const _LiveDot();
 
@@ -380,125 +463,50 @@ class _LiveDotState extends State<_LiveDot>
 }
 
 // ---------------------------------------------------------------------------
-// Filter bar
+// Feed section header
 // ---------------------------------------------------------------------------
 
-class _FilterBar extends StatelessWidget {
-  const _FilterBar({
-    required this.dateFilter,
-    required this.femaleOnly,
-    required this.onDateTap,
-    required this.onClearDate,
-    required this.onFemaleOnlyToggle,
-  });
-
-  final String? dateFilter;
-  final bool femaleOnly;
-  final VoidCallback onDateTap;
-  final VoidCallback onClearDate;
-  final ValueChanged<bool> onFemaleOnlyToggle;
+class _FeedSectionHeader extends StatelessWidget {
+  const _FeedSectionHeader({required this.count, required this.isRider});
+  final int count;
+  final bool isRider;
 
   @override
   Widget build(BuildContext context) {
-    final dateLabel = dateFilter != null
-        ? DateFormat('MMM d').format(DateTime.parse(dateFilter!))
-        : null;
+    final title = isRider ? 'Passengers to pick up' : 'Rides near you';
 
-    return Container(
-      color: AppColors.lightSurface,
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 8),
       child: Row(
         children: [
-          _FilterChip(
-            icon: Icons.calendar_month_rounded,
-            label: dateLabel ?? 'Any date',
-            active: dateLabel != null,
-            activeColor: AppColors.primary,
-            onTap: onDateTap,
-            trailing: dateLabel != null
-                ? GestureDetector(
-                    onTap: onClearDate,
-                    child: const Icon(
-                      Icons.close_rounded,
-                      size: 13,
-                      color: AppColors.primary,
-                    ),
-                  )
-                : null,
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              color: _charcoal,
+              letterSpacing: -0.4,
+            ),
           ),
           const SizedBox(width: 8),
-          _FilterChip(
-            icon: Icons.female_rounded,
-            label: 'Female only',
-            active: femaleOnly,
-            activeColor: const Color(0xFFDB2777),
-            onTap: () => onFemaleOnlyToggle(!femaleOnly),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FilterChip extends StatelessWidget {
-  const _FilterChip({
-    required this.icon,
-    required this.label,
-    required this.active,
-    required this.activeColor,
-    required this.onTap,
-    this.trailing,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool active;
-  final Color activeColor;
-  final VoidCallback onTap;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: active
-              ? activeColor.withValues(alpha: 0.10)
-              : AppColors.lightBackground,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(
-            color: active ? activeColor : AppColors.lightBorder,
-            width: 1,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 14,
-              color: active ? activeColor : AppColors.lightTextSecondary,
-            ),
-            const SizedBox(width: 6),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 200),
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: active ? FontWeight.w600 : FontWeight.w400,
-                color: active ? activeColor : AppColors.lightTextSecondary,
+          if (count > 0)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: _charcoal,
+                borderRadius: BorderRadius.circular(10),
               ),
-              child: Text(label),
+              child: Text(
+                '$count',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
             ),
-            if (trailing != null) ...[
-              const SizedBox(width: 4),
-              trailing!,
-            ],
-          ],
-        ),
+          const Spacer(),
+        ],
       ),
     );
   }
@@ -511,6 +519,7 @@ class _FilterChip extends StatelessWidget {
 class _FeedBody extends StatelessWidget {
   const _FeedBody({
     required this.feed,
+    required this.isRider,
     required this.scrollController,
     required this.onRefresh,
     required this.onRetry,
@@ -518,6 +527,7 @@ class _FeedBody extends StatelessWidget {
   });
 
   final RidesFeedState feed;
+  final bool isRider;
   final ScrollController scrollController;
   final Future<void> Function() onRefresh;
   final VoidCallback onRetry;
@@ -527,7 +537,7 @@ class _FeedBody extends StatelessWidget {
   Widget build(BuildContext context) {
     if (feed.status == RidesFeedStatus.loading && feed.rides.isEmpty) {
       return ListView.builder(
-        padding: const EdgeInsets.fromLTRB(0, 10, 0, 24),
+        padding: const EdgeInsets.fromLTRB(0, 6, 0, 24),
         itemCount: 5,
         itemBuilder: (_, _) => const RideCardSkeleton(),
       );
@@ -542,9 +552,11 @@ class _FeedBody extends StatelessWidget {
 
     if (feed.status == RidesFeedStatus.success && feed.rides.isEmpty) {
       return EmptyState(
-        icon: Icons.directions_car_outlined,
-        title: 'No rides available',
-        subtitle: 'Try a different date or check back later.',
+        icon: isRider ? Icons.hail_rounded : Icons.directions_bike_outlined,
+        title: isRider ? 'No ride requests yet' : 'No rides on offer yet',
+        subtitle: isRider
+            ? 'No passengers are looking for a ride right now. Check back soon.'
+            : 'No riders are offering rides right now. Check back soon.',
         action: OutlinedButton.icon(
           icon: const Icon(Icons.refresh_rounded),
           label: const Text('Refresh'),
@@ -554,12 +566,12 @@ class _FeedBody extends StatelessWidget {
     }
 
     return RefreshIndicator(
-      color: AppColors.primary,
+      color: _charcoal,
       onRefresh: onRefresh,
       child: ListView.builder(
         controller: scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(0, 10, 0, 24),
+        padding: const EdgeInsets.fromLTRB(0, 6, 0, 24),
         itemCount: feed.rides.length + (feed.isLoadingMore ? 1 : 0),
         itemBuilder: (context, index) {
           if (index >= feed.rides.length) {

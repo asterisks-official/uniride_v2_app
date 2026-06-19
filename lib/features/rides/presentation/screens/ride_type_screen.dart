@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../auth/presentation/providers/auth_notifier.dart';
 
-class RideTypeScreen extends StatefulWidget {
+class RideTypeScreen extends ConsumerStatefulWidget {
   const RideTypeScreen({super.key});
 
   @override
-  State<RideTypeScreen> createState() => _RideTypeScreenState();
+  ConsumerState<RideTypeScreen> createState() => _RideTypeScreenState();
 }
 
-class _RideTypeScreenState extends State<RideTypeScreen>
+class _RideTypeScreenState extends ConsumerState<RideTypeScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl = AnimationController(
     vsync: this,
@@ -45,6 +47,9 @@ class _RideTypeScreenState extends State<RideTypeScreen>
   @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.of(context).padding.bottom;
+
+    final auth = ref.watch(authNotifierProvider);
+    final isRider = auth is Authenticated && auth.user.role == 'RIDER';
 
     final headerFade = _anim(Tween(begin: 0.0, end: 1.0), 0.0, 0.55);
     final headerSlide = _anim(
@@ -86,7 +91,9 @@ class _RideTypeScreenState extends State<RideTypeScreen>
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'How are you\ntravelling today?',
+                          isRider
+                              ? 'Offer a ride\nto a classmate'
+                              : 'Where do you\nneed to go?',
                           style: const TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w800,
@@ -96,9 +103,11 @@ class _RideTypeScreenState extends State<RideTypeScreen>
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Pick your role for this trip',
-                          style: TextStyle(
+                        Text(
+                          isRider
+                              ? 'Post your route and pick up a passenger heading your way'
+                              : 'Post your trip and a verified rider will pick you up',
+                          style: const TextStyle(
                             fontSize: 15,
                             color: AppColors.lightTextSecondary,
                             height: 1.4,
@@ -111,35 +120,45 @@ class _RideTypeScreenState extends State<RideTypeScreen>
 
                 const SizedBox(height: 40),
 
+                // Primary action — locked to the user's role.
                 FadeTransition(
                   opacity: card1Fade,
                   child: SlideTransition(
                     position: card1Slide,
-                    child: _RoleCard(
-                      title: "I'm Offering a Ride",
-                      subtitle: 'Share your bike and earn on your commute',
-                      icon: Icons.directions_bike_rounded,
-                      accentColor: AppColors.primary,
-                      onTap: () => _pick('OFFER'),
-                    ),
+                    child: isRider
+                        ? _RoleCard(
+                            title: "Offer a Ride",
+                            subtitle: 'Share your bike and split the cost',
+                            icon: Icons.directions_bike_rounded,
+                            accentColor: AppColors.primary,
+                            onTap: () => _pick('OFFER'),
+                          )
+                        : _RoleCard(
+                            title: 'Request a Ride',
+                            subtitle: 'Find a verified rider heading your way',
+                            icon: Icons.hail_rounded,
+                            accentColor: const Color(0xFF60A5FA),
+                            onTap: () => _pick('REQUEST'),
+                          ),
                   ),
                 ),
 
-                const SizedBox(height: 14),
-
-                FadeTransition(
-                  opacity: card2Fade,
-                  child: SlideTransition(
-                    position: card2Slide,
-                    child: _RoleCard(
-                      title: 'I Need a Ride',
-                      subtitle: 'Find a biker heading your way',
-                      icon: Icons.hail_rounded,
-                      accentColor: const Color(0xFF60A5FA),
-                      onTap: () => _pick('REQUEST'),
+                // Passengers can upgrade to a rider to start offering rides.
+                if (!isRider) ...[
+                  const SizedBox(height: 14),
+                  FadeTransition(
+                    opacity: card2Fade,
+                    child: SlideTransition(
+                      position: card2Slide,
+                      child: _BecomeRiderCard(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          context.push('/verification');
+                        },
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
@@ -288,6 +307,48 @@ class _RoleCardState extends State<_RoleCard>
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// Subtle upsell for passengers to get verified and start offering rides.
+class _BecomeRiderCard extends StatelessWidget {
+  const _BecomeRiderCard({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.workspace_premium_rounded,
+                size: 20, color: AppColors.primary),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Have a bike? Become a verified rider to offer rides.',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.lightTextPrimary,
+                  height: 1.35,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_forward_rounded,
+                size: 18, color: AppColors.primary),
+          ],
         ),
       ),
     );

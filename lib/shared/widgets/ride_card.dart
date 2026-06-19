@@ -30,6 +30,9 @@ class _RideCardState extends State<RideCard>
 
   @override
   Widget build(BuildContext context) {
+    final accentColor =
+        widget.ride.isRequest ? const Color(0xFF60A5FA) : AppColors.primary;
+
     return GestureDetector(
       onTapDown: (_) => _ctrl.animateTo(0.0),
       onTapUp: (_) {
@@ -44,85 +47,113 @@ class _RideCardState extends State<RideCard>
           child: child,
         ),
         child: Container(
-          margin: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
           decoration: BoxDecoration(
             color: AppColors.lightSurface,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: AppColors.lightBorder.withValues(alpha: 0.5),
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.07),
-                blurRadius: 20,
-                offset: const Offset(0, 6),
+                color: accentColor.withValues(alpha: 0.05),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+                spreadRadius: -2,
               ),
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 4,
-                offset: const Offset(0, 1),
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Rider header ───────────────────────────────────────
-              Padding(
-                padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
-                child: Row(
-                  children: [
-                    _CardAvatar(rider: widget.ride.rider),
-                    const SizedBox(width: 10),
-                    Expanded(child: _CardRiderMeta(rider: widget.ride.rider)),
-                    const SizedBox(width: 8),
-                    _CardTimePill(scheduledAt: widget.ride.scheduledAt),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // ── Route block ────────────────────────────────────────
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: _CardRouteBlock(ride: widget.ride),
-              ),
-              const SizedBox(height: 12),
-
-              // ── Bottom bar ─────────────────────────────────────────
-              Padding(
-                padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      '৳${widget.ride.fare.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
-                        letterSpacing: -0.5,
-                        height: 1,
-                      ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Accent top bar
+                Container(
+                  height: 3,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        accentColor.withValues(alpha: 0.6),
+                        accentColor.withValues(alpha: 0.1),
+                      ],
                     ),
-                    const SizedBox(width: 5),
-                    const Padding(
-                      padding: EdgeInsets.only(top: 5),
-                      child: Text(
-                        'per seat',
+                  ),
+                ),
+
+                // Rider header
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 12, 14, 0),
+                  child: Row(
+                    children: [
+                      _CardAvatar(rider: widget.ride.poster),
+                      const SizedBox(width: 10),
+                      Expanded(
+                          child:
+                              _CardRiderMeta(rider: widget.ride.poster)),
+                      const SizedBox(width: 8),
+                      _CardTimePill(scheduledAt: widget.ride.scheduledAt),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Route block
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  child: _CardRouteBlock(ride: widget.ride),
+                ),
+                const SizedBox(height: 12),
+
+                // Bottom bar
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        '৳${widget.ride.fare.toStringAsFixed(0)}',
                         style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.lightMuted,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          color: accentColor,
+                          letterSpacing: -0.5,
+                          height: 1,
                         ),
                       ),
-                    ),
-                    const Spacer(),
-                    _SeatsBadge(seats: widget.ride.seatsAvailable),
-                    if (widget.ride.genderPref != 'ANY') ...[
-                      const SizedBox(width: 6),
-                      _GenderBadge(pref: widget.ride.genderPref),
+                      const SizedBox(width: 5),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          widget.ride.isRequest ? 'budget' : 'per seat',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.lightMuted,
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      if (widget.ride.isRequest)
+                        const _TypeChip(
+                          icon: Icons.hail_rounded,
+                          label: 'Wants a ride',
+                        )
+                      else
+                        _SeatsBadge(seats: widget.ride.seatsAvailable),
+                      if (widget.ride.genderPref != 'ANY') ...[
+                        const SizedBox(width: 6),
+                        _GenderBadge(pref: widget.ride.genderPref),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -140,29 +171,41 @@ class _CardAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        CircleAvatar(
-          radius: 22,
-          backgroundColor: AppColors.lightSegmentTrack,
-          backgroundImage: rider.profilePictureUrl != null
-              ? CachedNetworkImageProvider(rider.profilePictureUrl!)
-              : null,
-          child: rider.profilePictureUrl == null
-              ? Text(
-                  rider.name.isNotEmpty ? rider.name[0].toUpperCase() : '?',
-                  style: const TextStyle(
-                    color: AppColors.lightTextPrimary,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                  ),
-                )
-              : null,
+        Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: CircleAvatar(
+            radius: 20,
+            backgroundColor: AppColors.lightSegmentTrack,
+            backgroundImage: rider.profilePictureUrl != null
+                ? CachedNetworkImageProvider(rider.profilePictureUrl!)
+                : null,
+            child: rider.profilePictureUrl == null
+                ? Text(
+                    rider.name.isNotEmpty ? rider.name[0].toUpperCase() : '?',
+                    style: const TextStyle(
+                      color: AppColors.lightTextPrimary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                    ),
+                  )
+                : null,
+          ),
         ),
         Positioned(
           right: 0,
           bottom: 0,
           child: Container(
-            width: 11,
-            height: 11,
+            width: 10,
+            height: 10,
             decoration: BoxDecoration(
               color: AppColors.secondary,
               shape: BoxShape.circle,
@@ -189,13 +232,14 @@ class _CardRiderMeta extends StatelessWidget {
         Text(
           rider.name,
           style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            fontSize: 14.5,
             color: AppColors.lightTextPrimary,
+            letterSpacing: -0.2,
           ),
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 3),
+        const SizedBox(height: 2),
         Row(
           children: [
             const Icon(Icons.star_rounded, size: 13, color: AppColors.warning),
@@ -203,7 +247,7 @@ class _CardRiderMeta extends StatelessWidget {
             Text(
               '${rider.averageRating.toStringAsFixed(1)}  ·  ${rider.ridesCompleted} trips',
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 11.5,
                 color: AppColors.lightTextSecondary,
               ),
             ),
@@ -243,9 +287,9 @@ class _CardTimePill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
+        color: AppColors.lightSegmentTrack,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
@@ -254,9 +298,10 @@ class _CardTimePill extends StatelessWidget {
           Text(
             _dayLabel,
             style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: AppColors.primary,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w800,
+              color: AppColors.lightTextPrimary,
+              letterSpacing: -0.1,
             ),
           ),
           const SizedBox(height: 1),
@@ -264,7 +309,7 @@ class _CardTimePill extends StatelessWidget {
             _timeLabel,
             style: const TextStyle(
               fontSize: 10,
-              color: AppColors.primary,
+              color: AppColors.lightTextSecondary,
             ),
           ),
         ],
@@ -282,22 +327,21 @@ class _CardRouteBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: AppColors.lightBackground,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Timeline
           Padding(
             padding: const EdgeInsets.only(top: 2),
             child: Column(
               children: [
                 Container(
-                  width: 10,
-                  height: 10,
+                  width: 9,
+                  height: 9,
                   decoration: const BoxDecoration(
                     color: AppColors.primary,
                     shape: BoxShape.circle,
@@ -305,19 +349,21 @@ class _CardRouteBlock extends StatelessWidget {
                 ),
                 Container(
                   width: 1.5,
-                  height: 24,
+                  height: 20,
                   color: AppColors.lightBorder,
                 ),
-                const Icon(
-                  Icons.location_on_rounded,
-                  size: 13,
-                  color: AppColors.error,
+                Container(
+                  width: 9,
+                  height: 9,
+                  decoration: const BoxDecoration(
+                    color: AppColors.error,
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ],
             ),
           ),
           const SizedBox(width: 10),
-          // Addresses
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -332,7 +378,7 @@ class _CardRouteBlock extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
                 Text(
                   ride.destAddress,
                   style: const TextStyle(
@@ -344,6 +390,40 @@ class _CardRouteBlock extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Type chip ─────────────────────────────────────────────────────────────────
+
+class _TypeChip extends StatelessWidget {
+  const _TypeChip({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.info.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: AppColors.info),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.info,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
