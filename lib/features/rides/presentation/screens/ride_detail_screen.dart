@@ -434,7 +434,7 @@ class _RiderCTA extends StatelessWidget {
       case 'COMPLETED':
         return const _StatusChip(
           label: 'Ride completed',
-          color: AppColors.secondary,
+          color: AppColors.success,
         );
 
       case 'CANCELLED':
@@ -475,7 +475,7 @@ class _PassengerCTA extends StatelessWidget {
     if (joinedRequest != null) {
       return const _StatusChip(
         label: 'Request sent',
-        color: AppColors.secondary,
+        color: AppColors.success,
       );
     }
 
@@ -495,7 +495,7 @@ class _PassengerCTA extends StatelessWidget {
         if (_isPassenger) {
           return const _StatusChip(
             label: 'You\'re matched! Waiting for rider to start.',
-            color: AppColors.secondary,
+            color: AppColors.success,
           );
         }
         return const _StatusChip(label: 'Ride matched', color: AppColors.muted);
@@ -514,7 +514,7 @@ class _PassengerCTA extends StatelessWidget {
       case 'COMPLETED':
         return const _StatusChip(
           label: 'Ride completed',
-          color: AppColors.secondary,
+          color: AppColors.success,
         );
 
       case 'CANCELLED':
@@ -681,7 +681,7 @@ class _DetailGrid extends StatelessWidget {
           _DetailChip(
             icon: Icons.female,
             label: 'Female only',
-            color: const Color(0xFFDB2777),
+            color: AppColors.genderFemale,
           ),
         if (ride.genderPref == 'MALE_ONLY')
           _DetailChip(

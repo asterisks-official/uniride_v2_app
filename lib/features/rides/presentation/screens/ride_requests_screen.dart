@@ -51,7 +51,7 @@ class _RideRequestsScreenState extends ConsumerState<RideRequestsScreen> {
             ),
             behavior: SnackBarBehavior.floating,
             backgroundColor:
-                action == 'ACCEPT' ? AppColors.secondary : null,
+                action == 'ACCEPT' ? AppColors.success : null,
           ),
         );
       }
@@ -250,7 +250,7 @@ class _SwipeHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = accept ? AppColors.secondary : AppColors.error;
+    final color = accept ? AppColors.success : AppColors.error;
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
@@ -480,7 +480,7 @@ class _RequestCardContent extends StatelessWidget {
                         child: _ActionButton(
                           label: 'Accept',
                           icon: Icons.check_rounded,
-                          color: AppColors.secondary,
+                          color: AppColors.success,
                           filled: true,
                           disabled: isProcessing,
                           onTap: () async {

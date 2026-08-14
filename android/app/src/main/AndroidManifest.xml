@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Required for all network access. Flutter's templates declare this only
+         in the debug/profile manifests (for hot reload), so without it here a
+         release build ships with no network permission at all. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="uniride_app"
         android:name="${applicationName}"

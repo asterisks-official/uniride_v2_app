@@ -99,7 +99,11 @@ class Ride {
             ),
       originAddress: json['originAddress'] as String? ?? '',
       destAddress: json['destAddress'] as String? ?? '',
-      scheduledAt: DateTime.parse(json['scheduledAt'] as String),
+      // The API sends UTC ISO strings, so parse() yields a UTC DateTime.
+      // Convert once here, at the boundary, so every screen renders the
+      // rider's own clock — the feed previously showed UTC while the detail
+      // screen showed local, disagreeing by six hours in Dhaka.
+      scheduledAt: DateTime.parse(json['scheduledAt'] as String).toLocal(),
       fare: fare,
       seatsAvailable: (json['seatsAvailable'] as num?)?.toInt() ?? 0,
       status: json['status'] as String? ?? 'SEARCHING',

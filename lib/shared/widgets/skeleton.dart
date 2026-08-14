@@ -52,7 +52,7 @@ class _SkeletonBoxState extends State<SkeletonBox>
         height: widget.height,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(widget.borderRadius),
-          color: AppColors.border.withValues(alpha: _anim.value),
+          color: AppColors.skeleton.withValues(alpha: _anim.value),
         ),
       ),
     );
@@ -65,35 +65,55 @@ class RideCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Mirrors RideCard: time/fare head, two-stop route, then the driver row.
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(20),
         color: AppColors.surface,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.textPrimary.withValues(alpha: 0.05),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: [
-              const SkeletonBox(width: 40, height: 40, borderRadius: 20),
-              const SizedBox(width: 10),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  SkeletonBox(width: 120, height: 14),
+                children: [
+                  SkeletonBox(width: 62, height: 11),
                   SizedBox(height: 6),
-                  SkeletonBox(width: 80, height: 12),
+                  SkeletonBox(width: 88, height: 17),
                 ],
               ),
+              Spacer(),
+              SkeletonBox(width: 54, height: 19),
             ],
           ),
-          const SizedBox(height: 14),
-          const SkeletonBox(width: double.infinity, height: 14),
-          const SizedBox(height: 8),
-          const SkeletonBox(width: 160, height: 12),
+          const SizedBox(height: 18),
+          const SkeletonBox(width: 180, height: 13),
+          const SizedBox(height: 12),
+          const SkeletonBox(width: 150, height: 13),
+          const SizedBox(height: 18),
+          const Divider(height: 1, thickness: 1, color: AppColors.border),
+          const SizedBox(height: 12),
+          Row(
+            children: const [
+              SkeletonBox(width: 30, height: 30, borderRadius: 15),
+              SizedBox(width: 9),
+              SkeletonBox(width: 104, height: 13),
+              Spacer(),
+              SkeletonBox(width: 52, height: 20, borderRadius: 7),
+            ],
+          ),
         ],
       ),
     );
