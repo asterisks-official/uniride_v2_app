@@ -47,7 +47,9 @@ class PassengerSummary {
 class Ride {
   const Ride({
     required this.id,
+    required this.type,
     required this.riderId,
+    required this.creator,
     required this.rider,
     required this.originAddress,
     required this.destAddress,
@@ -61,8 +63,16 @@ class Ride {
   });
 
   final String id;
-  final String riderId;
-  final RiderSummary rider;
+
+  /// 'OFFER' (driver offering) or 'REQUEST' (passenger needing a ride).
+  final String type;
+
+  /// The actual driver. Null for unmatched REQUEST posts (filled at match).
+  final String? riderId;
+
+  /// Whoever posted the ride. For OFFER this is the driver; for REQUEST the passenger.
+  final RiderSummary creator;
+  final RiderSummary? rider;
   final String originAddress;
   final String destAddress;
   final DateTime scheduledAt;
@@ -75,8 +85,14 @@ class Ride {
   final PassengerSummary? passenger;
   final int? pendingRequestCount;
 
+  bool get isRequest => type == 'REQUEST';
+
+  /// The person to display on cards/headers — the poster.
+  RiderSummary get poster => creator;
+
   factory Ride.fromJson(Map<String, dynamic> json) {
     final riderJson = json['rider'] as Map<String, dynamic>?;
+    final creatorJson = json['creator'] as Map<String, dynamic>?;
     final passengerJson = json['passenger'] as Map<String, dynamic>?;
     final count = json['_count'] as Map<String, dynamic>?;
 
@@ -86,24 +102,28 @@ class Ride {
         ? fareRaw.toDouble()
         : double.tryParse(fareRaw?.toString() ?? '0') ?? 0.0;
 
-    return Ride(
-      id: json['id'] as String,
-      riderId: json['riderId'] as String? ?? '',
-      rider: riderJson != null
-          ? RiderSummary.fromJson(riderJson)
-          : const RiderSummary(
+    final rider =
+        riderJson != null ? RiderSummary.fromJson(riderJson) : null;
+    // Older responses may omit `creator`; fall back to rider, then Unknown.
+    final creator = creatorJson != null
+        ? RiderSummary.fromJson(creatorJson)
+        : rider ??
+            const RiderSummary(
               id: '',
               name: 'Unknown',
               averageRating: 0,
               ridesCompleted: 0,
-            ),
+            );
+
+    return Ride(
+      id: json['id'] as String,
+      type: json['type'] as String? ?? 'OFFER',
+      riderId: json['riderId'] as String?,
+      creator: creator,
+      rider: rider,
       originAddress: json['originAddress'] as String? ?? '',
       destAddress: json['destAddress'] as String? ?? '',
-      // The API sends UTC ISO strings, so parse() yields a UTC DateTime.
-      // Convert once here, at the boundary, so every screen renders the
-      // rider's own clock — the feed previously showed UTC while the detail
-      // screen showed local, disagreeing by six hours in Dhaka.
-      scheduledAt: DateTime.parse(json['scheduledAt'] as String).toLocal(),
+      scheduledAt: DateTime.parse(json['scheduledAt'] as String),
       fare: fare,
       seatsAvailable: (json['seatsAvailable'] as num?)?.toInt() ?? 0,
       status: json['status'] as String? ?? 'SEARCHING',

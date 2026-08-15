@@ -274,7 +274,8 @@ class _DriverRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rider = ride.rider;
+    // The poster: the driver on an OFFER, the passenger on a REQUEST.
+    final rider = ride.poster;
     final avatar = rider.profilePictureUrl;
     final seats = ride.seatsAvailable;
 

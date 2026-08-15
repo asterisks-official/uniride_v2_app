@@ -183,7 +183,7 @@ class _RideDetailBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final rider = ride.rider;
+    final rider = ride.poster;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
