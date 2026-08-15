@@ -28,6 +28,18 @@ class RiderRemoteDataSource {
     return _data(res);
   }
 
+  /// Corrects an existing profile. A rejected one goes back to PENDING for
+  /// another review; only the keys present in [body] are changed.
+  Future<Map<String, dynamic>> updateRiderProfile(
+    Map<String, dynamic> body,
+  ) async {
+    final res = await _dio.patch<Map<String, dynamic>>(
+      '/users/me/rider-profile',
+      data: body,
+    );
+    return _data(res);
+  }
+
   /// Returns { uploadUrl, publicUrl, key }.
   Future<Map<String, dynamic>> presign(
     String folder,

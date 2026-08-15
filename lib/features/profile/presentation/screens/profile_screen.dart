@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/account_enums.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/exceptions/app_exception.dart';
 import '../../../../shared/widgets/error_retry.dart';
 import '../../../../shared/widgets/skeleton.dart';
 import '../../../../shared/widgets/trust_score_ring.dart';
 import '../../../auth/presentation/providers/auth_notifier.dart';
+import '../../../rides/presentation/providers/my_rides_notifier.dart';
+import '../../../rides/presentation/providers/rides_feed_notifier.dart';
 import '../../domain/models/user_profile.dart';
 import '../providers/profile_notifier.dart';
 
@@ -183,6 +186,12 @@ class _ProfileBody extends ConsumerWidget {
             color: AppColors.surface,
             child: Column(
               children: [
+                if (profile.isRider)
+                  _ModeSwitcher(
+                    current: profile.activeMode,
+                    onSwitch: (mode) => _switchMode(context, ref, mode),
+                  ),
+                if (profile.isRider) const Divider(height: 1, indent: 56),
                 _MenuItem(
                   icon: Icons.directions_car_outlined,
                   label: 'My Rides',
@@ -234,6 +243,39 @@ class _ProfileBody extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// Switch sides, then drop every cache that holds the old side's data.
+  ///
+  /// The switch returns new tokens, so anything already fetched belongs to the
+  /// wrong audience: the feed shows the opposite market, and "my rides" is
+  /// scoped to who you were. Clearing only the feed would leave a passenger
+  /// looking at rider content and reads as a bug.
+  Future<void> _switchMode(
+    BuildContext context,
+    WidgetRef ref,
+    ActiveMode mode,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(authNotifierProvider.notifier).switchMode(mode);
+
+      ref.invalidate(ridesFeedProvider);
+      ref.invalidate(myRidesProvider);
+      ref.invalidate(profileNotifierProvider);
+
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            mode == ActiveMode.rider
+                ? 'Switched to rider — showing ride requests'
+                : 'Switched to passenger — showing ride offers',
+          ),
+        ),
+      );
+    } on AppException catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(e.message)));
+    }
   }
 
   void _confirmDelete(BuildContext context, WidgetRef ref) {
@@ -377,6 +419,99 @@ class _MenuItem extends StatelessWidget {
       title: Text(label, style: TextStyle(color: c)),
       trailing: const Icon(Icons.chevron_right, color: AppColors.muted),
       onTap: onTap,
+    );
+  }
+}
+
+/// Two-way switch between the passenger and rider views. Shown only to
+/// approved riders — for everyone else the "Become a Rider" entry is the
+/// relevant control.
+class _ModeSwitcher extends StatelessWidget {
+  const _ModeSwitcher({required this.current, required this.onSwitch});
+
+  final ActiveMode current;
+  final ValueChanged<ActiveMode> onSwitch;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.swap_horiz, size: 22, color: AppColors.textSecondary),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Text(
+                  'Browsing as',
+                  style: TextStyle(fontSize: 15, color: AppColors.textPrimary),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: AppColors.segmentTrack,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                for (final m in ActiveMode.values)
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: current == m ? null : () => onSwitch(m),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeOut,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          color: current == m
+                              ? AppColors.surface
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(9),
+                          boxShadow: current == m
+                              ? [
+                                  BoxShadow(
+                                    color: AppColors.textPrimary
+                                        .withValues(alpha: 0.07),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: Text(
+                          m.label,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: current == m
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                            color: current == m
+                                ? AppColors.primary
+                                : AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            current == ActiveMode.rider
+                ? 'Showing ride requests from passengers.'
+                : 'Showing ride offers from drivers.',
+            style: const TextStyle(fontSize: 12, color: AppColors.muted),
+          ),
+        ],
+      ),
     );
   }
 }

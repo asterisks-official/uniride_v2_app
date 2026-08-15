@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:uniride_app/shared/widgets/app_button.dart';
+import 'package:uniride_app/shared/widgets/uni_loader.dart';
 
 void main() {
   testWidgets('AppButton shows label and fires onPressed', (tester) async {
@@ -38,8 +39,21 @@ void main() {
       ),
     );
 
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(UniLoader), findsOneWidget);
+    expect(find.text('Log in'), findsNothing);
     await tester.tap(find.byType(AppButton));
     expect(tapped, isFalse);
+  });
+
+  testWidgets('AppButton ignores taps when onPressed is null', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(body: AppButton(label: 'Continue', onPressed: null)),
+      ),
+    );
+
+    expect(find.text('Continue'), findsOneWidget);
+    await tester.tap(find.byType(AppButton));
+    await tester.pump();
   });
 }

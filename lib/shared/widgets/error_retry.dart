@@ -3,11 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 
 class ErrorRetry extends StatelessWidget {
-  const ErrorRetry({
-    super.key,
-    required this.message,
-    required this.onRetry,
-  });
+  const ErrorRetry({super.key, required this.message, required this.onRetry});
 
   final String message;
   final VoidCallback onRetry;

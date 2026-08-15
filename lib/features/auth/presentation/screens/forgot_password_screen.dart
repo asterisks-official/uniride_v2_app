@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/exceptions/app_exception.dart';
 import '../../../../shared/widgets/app_button.dart';
+import '../../../../shared/widgets/app_snack.dart';
+import '../../../../shared/widgets/loading_overlay.dart';
 import '../providers/auth_notifier.dart';
 import '../widgets/auth_scaffold.dart';
 import '../widgets/auth_text_field.dart';
@@ -30,11 +32,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    FocusScope.of(context).unfocus();
     setState(() => _loading = true);
     try {
       final email = _email.text.trim();
-      final devOtp =
-          await ref.read(authNotifierProvider.notifier).forgotPassword(email);
+      final devOtp = await ref.read(appLoadingProvider.notifier).run(
+            () => ref
+                .read(authNotifierProvider.notifier)
+                .forgotPassword(email),
+            message: 'Sending your reset code',
+          );
       if (mounted) {
         context.push(
           '/reset-password',
@@ -42,10 +49,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         );
       }
     } on AppException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.message)));
-      }
+      if (mounted) showAppSnack(context, e.message, isError: true);
     } finally {
       if (mounted) setState(() => _loading = false);
     }

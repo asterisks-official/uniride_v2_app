@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/exceptions/app_exception.dart';
 import '../../../../shared/widgets/app_button.dart';
+import '../../../../shared/widgets/app_snack.dart';
+import '../../../../shared/widgets/loading_overlay.dart';
 import '../providers/auth_notifier.dart';
 import '../widgets/auth_scaffold.dart';
 import '../widgets/auth_text_field.dart';
@@ -35,24 +37,24 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    FocusScope.of(context).unfocus();
     setState(() => _loading = true);
     try {
-      await ref.read(authNotifierProvider.notifier).resetPassword(
-            email: widget.email,
-            otp: _otp.text.trim(),
-            newPassword: _password.text,
+      await ref.read(appLoadingProvider.notifier).run(
+            () => ref.read(authNotifierProvider.notifier).resetPassword(
+                  email: widget.email,
+                  otp: _otp.text.trim(),
+                  newPassword: _password.text,
+                ),
+            message: 'Updating your password',
+            successMessage: 'Password updated',
           );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password reset. Please log in.')),
-        );
+        showAppSnack(context, 'Password reset. Please log in.');
         context.go('/login');
       }
     } on AppException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.message)));
-      }
+      if (mounted) showAppSnack(context, e.message, isError: true);
     } finally {
       if (mounted) setState(() => _loading = false);
     }

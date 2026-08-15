@@ -283,8 +283,9 @@ class _DriverRow extends StatelessWidget {
         CircleAvatar(
           radius: 15,
           backgroundColor: AppColors.primaryWash,
-          backgroundImage:
-              avatar != null ? CachedNetworkImageProvider(avatar) : null,
+          backgroundImage: avatar != null
+              ? CachedNetworkImageProvider(avatar)
+              : null,
           child: avatar == null
               ? Text(
                   rider.name.isNotEmpty ? rider.name[0].toUpperCase() : '?',

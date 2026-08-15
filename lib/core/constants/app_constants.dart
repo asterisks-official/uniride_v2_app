@@ -24,4 +24,9 @@ class AppConstants {
 
   static const Duration connectTimeout = Duration(seconds: 20);
   static const Duration receiveTimeout = Duration(seconds: 20);
+
+  /// Rejections a rider application gets before the account is blocked. Shown
+  /// to the applicant as "attempts left"; the server enforces it. Must match
+  /// MAX_RIDER_REJECTIONS in the backend's shared/utils/identity.ts.
+  static const int maxRiderRejections = 3;
 }

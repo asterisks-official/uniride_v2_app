@@ -9,6 +9,9 @@ class AuthRemoteDataSource {
     required String name,
     required String email,
     required String password,
+    required String gender,
+    required String studentIdNumber,
+    required String joinAs,
     String? university,
     String? phone,
   }) async {
@@ -18,9 +21,36 @@ class AuthRemoteDataSource {
         'name': name,
         'email': email,
         'password': password,
+        'gender': gender,
+        'studentIdNumber': studentIdNumber,
+        'joinAs': joinAs,
         if (university != null && university.isNotEmpty) 'university': university,
         if (phone != null && phone.isNotEmpty) 'phone': phone,
       },
+    );
+    return _data(res);
+  }
+
+  /// Switch which side of the market the user browses.
+  ///
+  /// Returns a fresh token pair: the mode is carried in the JWT, so the old
+  /// token would keep serving the previous side of the feed.
+  Future<Map<String, dynamic>> switchMode(String mode) async {
+    final res = await _dio.post<Map<String, dynamic>>(
+      '/users/me/active-mode',
+      data: {'mode': mode},
+    );
+    return _data(res);
+  }
+
+  /// Fill in fields that predate them being required at signup.
+  Future<Map<String, dynamic>> completeProfile({
+    required String gender,
+    required String studentIdNumber,
+  }) async {
+    final res = await _dio.patch<Map<String, dynamic>>(
+      '/users/me',
+      data: {'gender': gender, 'studentIdNumber': studentIdNumber},
     );
     return _data(res);
   }

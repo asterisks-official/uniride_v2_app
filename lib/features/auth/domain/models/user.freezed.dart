@@ -15,7 +15,10 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$User {
 
- String get id; String get name; String get email; String get role; bool get isEmailVerified;
+ String get id; String get name; String get email; String get role; bool get isEmailVerified;/// This account was created as a rider application. Distinct from [role],
+/// which is the granted capability — the intent is what holds the account
+/// on the application screen until an admin approves it.
+ bool get signedUpAsRider;
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +31,16 @@ $UserCopyWith<User> get copyWith => _$UserCopyWithImpl<User>(this as User, _$ide
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is User&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.role, role) || other.role == role)&&(identical(other.isEmailVerified, isEmailVerified) || other.isEmailVerified == isEmailVerified));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is User&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.role, role) || other.role == role)&&(identical(other.isEmailVerified, isEmailVerified) || other.isEmailVerified == isEmailVerified)&&(identical(other.signedUpAsRider, signedUpAsRider) || other.signedUpAsRider == signedUpAsRider));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,email,role,isEmailVerified);
+int get hashCode => Object.hash(runtimeType,id,name,email,role,isEmailVerified,signedUpAsRider);
 
 @override
 String toString() {
-  return 'User(id: $id, name: $name, email: $email, role: $role, isEmailVerified: $isEmailVerified)';
+  return 'User(id: $id, name: $name, email: $email, role: $role, isEmailVerified: $isEmailVerified, signedUpAsRider: $signedUpAsRider)';
 }
 
 
@@ -48,7 +51,7 @@ abstract mixin class $UserCopyWith<$Res>  {
   factory $UserCopyWith(User value, $Res Function(User) _then) = _$UserCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String email, String role, bool isEmailVerified
+ String id, String name, String email, String role, bool isEmailVerified, bool signedUpAsRider
 });
 
 
@@ -65,13 +68,14 @@ class _$UserCopyWithImpl<$Res>
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? email = null,Object? role = null,Object? isEmailVerified = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? email = null,Object? role = null,Object? isEmailVerified = null,Object? signedUpAsRider = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
 as String,isEmailVerified: null == isEmailVerified ? _self.isEmailVerified : isEmailVerified // ignore: cast_nullable_to_non_nullable
+as bool,signedUpAsRider: null == signedUpAsRider ? _self.signedUpAsRider : signedUpAsRider // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -157,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String email,  String role,  bool isEmailVerified)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String email,  String role,  bool isEmailVerified,  bool signedUpAsRider)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
-return $default(_that.id,_that.name,_that.email,_that.role,_that.isEmailVerified);case _:
+return $default(_that.id,_that.name,_that.email,_that.role,_that.isEmailVerified,_that.signedUpAsRider);case _:
   return orElse();
 
 }
@@ -178,10 +182,10 @@ return $default(_that.id,_that.name,_that.email,_that.role,_that.isEmailVerified
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String email,  String role,  bool isEmailVerified)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String email,  String role,  bool isEmailVerified,  bool signedUpAsRider)  $default,) {final _that = this;
 switch (_that) {
 case _User():
-return $default(_that.id,_that.name,_that.email,_that.role,_that.isEmailVerified);case _:
+return $default(_that.id,_that.name,_that.email,_that.role,_that.isEmailVerified,_that.signedUpAsRider);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +202,10 @@ return $default(_that.id,_that.name,_that.email,_that.role,_that.isEmailVerified
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String email,  String role,  bool isEmailVerified)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String email,  String role,  bool isEmailVerified,  bool signedUpAsRider)?  $default,) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
-return $default(_that.id,_that.name,_that.email,_that.role,_that.isEmailVerified);case _:
+return $default(_that.id,_that.name,_that.email,_that.role,_that.isEmailVerified,_that.signedUpAsRider);case _:
   return null;
 
 }
@@ -213,7 +217,7 @@ return $default(_that.id,_that.name,_that.email,_that.role,_that.isEmailVerified
 @JsonSerializable()
 
 class _User implements User {
-  const _User({required this.id, required this.name, required this.email, required this.role, required this.isEmailVerified});
+  const _User({required this.id, required this.name, required this.email, required this.role, required this.isEmailVerified, this.signedUpAsRider = false});
   factory _User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
 @override final  String id;
@@ -221,6 +225,10 @@ class _User implements User {
 @override final  String email;
 @override final  String role;
 @override final  bool isEmailVerified;
+/// This account was created as a rider application. Distinct from [role],
+/// which is the granted capability — the intent is what holds the account
+/// on the application screen until an admin approves it.
+@override@JsonKey() final  bool signedUpAsRider;
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
@@ -235,16 +243,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _User&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.role, role) || other.role == role)&&(identical(other.isEmailVerified, isEmailVerified) || other.isEmailVerified == isEmailVerified));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _User&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.role, role) || other.role == role)&&(identical(other.isEmailVerified, isEmailVerified) || other.isEmailVerified == isEmailVerified)&&(identical(other.signedUpAsRider, signedUpAsRider) || other.signedUpAsRider == signedUpAsRider));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,email,role,isEmailVerified);
+int get hashCode => Object.hash(runtimeType,id,name,email,role,isEmailVerified,signedUpAsRider);
 
 @override
 String toString() {
-  return 'User(id: $id, name: $name, email: $email, role: $role, isEmailVerified: $isEmailVerified)';
+  return 'User(id: $id, name: $name, email: $email, role: $role, isEmailVerified: $isEmailVerified, signedUpAsRider: $signedUpAsRider)';
 }
 
 
@@ -255,7 +263,7 @@ abstract mixin class _$UserCopyWith<$Res> implements $UserCopyWith<$Res> {
   factory _$UserCopyWith(_User value, $Res Function(_User) _then) = __$UserCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String email, String role, bool isEmailVerified
+ String id, String name, String email, String role, bool isEmailVerified, bool signedUpAsRider
 });
 
 
@@ -272,13 +280,14 @@ class __$UserCopyWithImpl<$Res>
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? email = null,Object? role = null,Object? isEmailVerified = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? email = null,Object? role = null,Object? isEmailVerified = null,Object? signedUpAsRider = null,}) {
   return _then(_User(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
 as String,isEmailVerified: null == isEmailVerified ? _self.isEmailVerified : isEmailVerified // ignore: cast_nullable_to_non_nullable
+as bool,signedUpAsRider: null == signedUpAsRider ? _self.signedUpAsRider : signedUpAsRider // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

@@ -17,6 +17,15 @@ _RiderProfile _$RiderProfileFromJson(Map<String, dynamic> json) =>
       licensePlate: json['licensePlate'] as String,
       verificationStatus: json['verificationStatus'] as String,
       adminNote: json['adminNote'] as String?,
+      rejectionCount: (json['rejectionCount'] as num?)?.toInt() ?? 0,
+      licenseDocUrl: json['licenseDocUrl'] as String?,
+      vehiclePhotoUrl: json['vehiclePhotoUrl'] as String?,
+      licensePlatePhotoUrl: json['licensePlatePhotoUrl'] as String?,
+      studentIdDocUrl: json['studentIdDocUrl'] as String?,
+      selfieUrl: json['selfieUrl'] as String?,
+      faceVerifiedAt: json['faceVerifiedAt'] == null
+          ? null
+          : DateTime.parse(json['faceVerifiedAt'] as String),
     );
 
 Map<String, dynamic> _$RiderProfileToJson(_RiderProfile instance) =>
@@ -30,4 +39,11 @@ Map<String, dynamic> _$RiderProfileToJson(_RiderProfile instance) =>
       'licensePlate': instance.licensePlate,
       'verificationStatus': instance.verificationStatus,
       'adminNote': instance.adminNote,
+      'rejectionCount': instance.rejectionCount,
+      'licenseDocUrl': instance.licenseDocUrl,
+      'vehiclePhotoUrl': instance.vehiclePhotoUrl,
+      'licensePlatePhotoUrl': instance.licensePlatePhotoUrl,
+      'studentIdDocUrl': instance.studentIdDocUrl,
+      'selfieUrl': instance.selfieUrl,
+      'faceVerifiedAt': instance.faceVerifiedAt?.toIso8601String(),
     };

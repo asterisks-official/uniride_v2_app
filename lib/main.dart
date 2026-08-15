@@ -5,6 +5,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'core/config/app_env.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'shared/widgets/loading_overlay.dart';
 
 // Pass --dart-define=SENTRY_DSN=https://... to enable crash reporting.
 const _sentryDsn = String.fromEnvironment('SENTRY_DSN');
@@ -41,6 +42,10 @@ class UniRideApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       routerConfig: router,
+      // Above the navigator, so a HUD raised on one screen fades out over the
+      // next one rather than disappearing with the route that raised it.
+      builder: (context, child) =>
+          AppLoadingScope(child: child ?? const SizedBox.shrink()),
     );
   }
 }

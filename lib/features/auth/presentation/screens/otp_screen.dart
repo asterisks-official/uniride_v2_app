@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/exceptions/app_exception.dart';
 import '../../../../shared/widgets/app_button.dart';
+import '../../../../shared/widgets/app_snack.dart';
+import '../../../../shared/widgets/loading_overlay.dart';
 import '../providers/auth_notifier.dart';
 import '../widgets/auth_scaffold.dart';
 import '../widgets/otp_input.dart';
@@ -55,19 +57,23 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   Future<void> _submit() async {
     final code = _otp.text.trim();
     if (code.length != 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter the 6-digit code')),
-      );
+      showAppSnack(context, 'Enter the 6-digit code', isError: true);
       return;
     }
+    FocusScope.of(context).unfocus();
     setState(() => _loading = true);
     try {
-      await ref.read(authNotifierProvider.notifier).verifyEmail(code);
+      await ref.read(appLoadingProvider.notifier).run(
+            () => ref.read(authNotifierProvider.notifier).verifyEmail(code),
+            message: 'Verifying your email',
+            successMessage: 'Email verified',
+          );
+      // No navigation here on purpose. Verifying flips the session to
+      // authenticated, and the router's redirect — to the rider application or
+      // to the feed — has already unmounted this screen by the time the await
+      // returns.
     } on AppException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.message)));
-      }
+      if (mounted) showAppSnack(context, e.message, isError: true);
     } finally {
       if (mounted) setState(() => _loading = false);
     }

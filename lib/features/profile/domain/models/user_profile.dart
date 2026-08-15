@@ -1,3 +1,5 @@
+import '../../../../core/constants/account_enums.dart';
+
 class UserStats {
   const UserStats({
     required this.ridesCompleted,
@@ -34,6 +36,9 @@ class UserProfile {
     this.university,
     this.bio,
     this.stats,
+    this.activeMode = ActiveMode.passenger,
+    this.gender,
+    this.studentIdNumber,
   });
 
   final String id;
@@ -47,7 +52,19 @@ class UserProfile {
   final String? bio;
   final UserStats? stats;
 
+  /// Which side of the market this user is currently browsing.
+  final ActiveMode activeMode;
+
+  final Gender? gender;
+  final String? studentIdNumber;
+
+  /// Whether an admin has approved this user to drive. This is the capability,
+  /// not the current view — see [activeMode].
   bool get isRider => role == 'RIDER';
+
+  /// Accounts created before gender and student ID were required at signup.
+  bool get needsProfileCompletion =>
+      gender == null || (studentIdNumber?.isEmpty ?? true);
 
   factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
         id: json['id'] as String,
@@ -62,5 +79,8 @@ class UserProfile {
         stats: json['stats'] is Map<String, dynamic>
             ? UserStats.fromJson(json['stats'] as Map<String, dynamic>)
             : null,
+        activeMode: ActiveMode.fromWire(json['activeMode'] as String?),
+        gender: Gender.fromWire(json['gender'] as String?),
+        studentIdNumber: json['studentIdNumber'] as String?,
       );
 }

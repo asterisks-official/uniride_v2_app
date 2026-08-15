@@ -26,6 +26,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>UniRide uses the camera for the live face check on your rider application and to photograph your documents.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>UniRide needs access to your photos so you can attach your licence, student ID and vehicle photos.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

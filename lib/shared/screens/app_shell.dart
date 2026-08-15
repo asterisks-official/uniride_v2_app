@@ -4,25 +4,55 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/services/connectivity_service.dart';
+import '../../features/profile/presentation/providers/profile_notifier.dart';
+import '../../features/profile/presentation/widgets/complete_profile_sheet.dart';
 import '../widgets/glass_nav_bar.dart';
 import '../widgets/offline_banner.dart';
 
-class AppShell extends ConsumerWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
-  void _onBranch(int index) => navigationShell.goBranch(
+  @override
+  ConsumerState<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends ConsumerState<AppShell> {
+  /// Guards against re-opening the sheet on every rebuild while it is already
+  /// on screen, or after the user has just completed it.
+  bool _promptShown = false;
+
+  void _onBranch(int index) => widget.navigationShell.goBranch(
         index,
-        initialLocation: index == navigationShell.currentIndex,
+        initialLocation: index == widget.navigationShell.currentIndex,
       );
 
+  /// Accounts created before gender and student ID were required get one
+  /// blocking prompt. Deferred to after the frame because showing a modal
+  /// during build throws.
+  void _maybePromptCompletion() {
+    if (_promptShown) return;
+    final profile = ref.read(profileNotifierProvider).asData?.value;
+    if (profile == null || !profile.needsProfileCompletion) return;
+
+    _promptShown = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) CompleteProfileSheet.show(context);
+    });
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final navigationShell = widget.navigationShell;
+
     final isOnline = ref.watch(isOnlineProvider).maybeWhen(
       data: (v) => v,
       orElse: () => true,
     );
+
+    ref.watch(profileNotifierProvider);
+    _maybePromptCompletion();
 
     final mq = MediaQuery.of(context);
 

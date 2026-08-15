@@ -26,6 +26,42 @@ const _authRoutes = {
   '/reset-password',
 };
 
+/// Where [auth] belongs when it asks for [location]. Null allows the location
+/// as-is.
+///
+/// Kept as a plain function so the rule can be exercised without a widget tree
+/// — the rider redirect below is the sort of thing that breaks silently.
+String? authRedirect(AuthState auth, String location) {
+  if (auth is AuthUnknown) {
+    return location == '/splash' ? null : '/splash';
+  }
+
+  if (auth is! Authenticated) {
+    if (_authRoutes.contains(location)) return null;
+    return '/login';
+  }
+
+  switch (auth.riderGate) {
+    // Still asking the server. Wait on the splash rather than show a feed the
+    // next frame may take away.
+    case RiderGate.checking:
+      return location == '/splash' ? null : '/splash';
+
+    // Signed up as a rider without an approved application: the application is
+    // the only screen they get. Enforced here rather than by hiding buttons,
+    // so it survives deep links and a restart mid-flow.
+    case RiderGate.locked:
+      return location == '/verification' ? null : '/verification';
+
+    case RiderGate.open:
+      break;
+  }
+
+  // Authenticated: keep out of splash/auth screens.
+  if (location == '/splash' || _authRoutes.contains(location)) return '/home';
+  return null;
+}
+
 final routerProvider = Provider<GoRouter>((ref) {
   final refresh = ValueNotifier(0);
   ref.listen(authNotifierProvider, (_, _) => refresh.value++);
@@ -34,24 +70,8 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/splash',
     refreshListenable: refresh,
-    redirect: (context, state) {
-      final auth = ref.read(authNotifierProvider);
-      final loc = state.matchedLocation;
-
-      if (auth is AuthUnknown) {
-        return loc == '/splash' ? null : '/splash';
-      }
-
-      final loggedIn = auth is Authenticated;
-      if (!loggedIn) {
-        if (_authRoutes.contains(loc)) return null;
-        return '/login';
-      }
-
-      // Authenticated: keep out of splash/auth screens.
-      if (loc == '/splash' || _authRoutes.contains(loc)) return '/home';
-      return null;
-    },
+    redirect: (context, state) =>
+        authRedirect(ref.read(authNotifierProvider), state.matchedLocation),
     routes: [
       // Public / auth routes (outside the shell — no bottom nav)
       GoRoute(path: '/splash', builder: (_, _) => const SplashScreen()),
@@ -100,23 +120,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/rides/:id',
-        builder: (_, state) => RideDetailScreen(
-          rideId: state.pathParameters['id']!,
-        ),
+        builder: (_, state) =>
+            RideDetailScreen(rideId: state.pathParameters['id']!),
         routes: [
           GoRoute(
             path: 'requests',
-            builder: (_, state) => RideRequestsScreen(
-              rideId: state.pathParameters['id']!,
-            ),
+            builder: (_, state) =>
+                RideRequestsScreen(rideId: state.pathParameters['id']!),
           ),
         ],
       ),
       // My Rides as a full-screen push destination (accessible from Profile)
-      GoRoute(
-        path: '/rides',
-        builder: (_, _) => const MyRidesScreen(),
-      ),
+      GoRoute(path: '/rides', builder: (_, _) => const MyRidesScreen()),
 
       // Authenticated shell with bottom nav (Home | Create | Alerts | Profile)
       StatefulShellRoute.indexedStack(
@@ -125,18 +140,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         branches: [
           StatefulShellBranch(
             routes: [
-              GoRoute(
-                path: '/home',
-                builder: (_, _) => const HomeScreen(),
-              ),
+              GoRoute(path: '/home', builder: (_, _) => const HomeScreen()),
             ],
           ),
           StatefulShellBranch(
             routes: [
-              GoRoute(
-                path: '/alerts',
-                builder: (_, _) => const AlertsScreen(),
-              ),
+              GoRoute(path: '/alerts', builder: (_, _) => const AlertsScreen()),
             ],
           ),
           StatefulShellBranch(

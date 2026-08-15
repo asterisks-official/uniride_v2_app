@@ -12,6 +12,7 @@ _User _$UserFromJson(Map<String, dynamic> json) => _User(
   email: json['email'] as String,
   role: json['role'] as String,
   isEmailVerified: json['isEmailVerified'] as bool,
+  signedUpAsRider: json['signedUpAsRider'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
@@ -20,4 +21,5 @@ Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
   'email': instance.email,
   'role': instance.role,
   'isEmailVerified': instance.isEmailVerified,
+  'signedUpAsRider': instance.signedUpAsRider,
 };

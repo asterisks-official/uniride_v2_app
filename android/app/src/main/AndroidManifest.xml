@@ -3,6 +3,11 @@
          in the debug/profile manifests (for hot reload), so without it here a
          release build ships with no network permission at all. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Live face verification and document photos. Declared here rather than
+         relying on the camera plugin's manifest merge so a release build can
+         never ship without it. -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <application
         android:label="uniride_app"
         android:name="${applicationName}"

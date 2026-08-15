@@ -31,9 +31,10 @@ class _SkeletonBoxState extends State<SkeletonBox>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     );
-    _anim = Tween(begin: 0.3, end: 0.9).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
+    _anim = Tween(
+      begin: 0.3,
+      end: 0.9,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
     _ctrl.repeat(reverse: true);
   }
 
@@ -195,7 +196,11 @@ class RideDetailSkeleton extends StatelessWidget {
           const SizedBox(height: 28),
 
           // CTA button
-          const SkeletonBox(width: double.infinity, height: 48, borderRadius: 12),
+          const SkeletonBox(
+            width: double.infinity,
+            height: 48,
+            borderRadius: 12,
+          ),
         ],
       ),
     );
@@ -238,9 +243,21 @@ class RequestCardSkeleton extends StatelessWidget {
           const SizedBox(height: 14),
           Row(
             children: const [
-              Expanded(child: SkeletonBox(width: double.infinity, height: 40, borderRadius: 8)),
+              Expanded(
+                child: SkeletonBox(
+                  width: double.infinity,
+                  height: 40,
+                  borderRadius: 8,
+                ),
+              ),
               SizedBox(width: 12),
-              Expanded(child: SkeletonBox(width: double.infinity, height: 40, borderRadius: 8)),
+              Expanded(
+                child: SkeletonBox(
+                  width: double.infinity,
+                  height: 40,
+                  borderRadius: 8,
+                ),
+              ),
             ],
           ),
         ],
@@ -261,7 +278,11 @@ class FormScreenSkeleton extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       children: [
         for (int i = 0; i < fieldCount; i++) ...[
-          const SkeletonBox(width: double.infinity, height: 56, borderRadius: 10),
+          const SkeletonBox(
+            width: double.infinity,
+            height: 56,
+            borderRadius: 10,
+          ),
           const SizedBox(height: 16),
         ],
         const SizedBox(height: 8),
