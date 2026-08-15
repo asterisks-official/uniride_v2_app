@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../providers/onboarding_provider.dart';
 import '../../features/auth/presentation/providers/auth_notifier.dart';
 import '../../features/auth/presentation/screens/auth_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
@@ -9,6 +10,7 @@ import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/notifications/presentation/screens/alerts_screen.dart';
+import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/rider/presentation/screens/rider_verification_screen.dart';
 import '../../features/rides/presentation/screens/create_ride_screen.dart';
@@ -31,12 +33,24 @@ const _authRoutes = {
 ///
 /// Kept as a plain function so the rule can be exercised without a widget tree
 /// — the rider redirect below is the sort of thing that breaks silently.
-String? authRedirect(AuthState auth, String location) {
+String? authRedirect(
+  AuthState auth,
+  String location, {
+  required bool onboardingSeen,
+}) {
   if (auth is AuthUnknown) {
     return location == '/splash' ? null : '/splash';
   }
 
   if (auth is! Authenticated) {
+    // First run: say what the app is for before asking anyone to sign up.
+    // Only for signed-out users — someone with a session has plainly already
+    // been introduced, and on an existing install the flag is false purely
+    // because it postdates them.
+    if (!onboardingSeen) {
+      return location == '/onboarding' ? null : '/onboarding';
+    }
+    if (location == '/onboarding') return '/login';
     if (_authRoutes.contains(location)) return null;
     return '/login';
   }
@@ -57,24 +71,33 @@ String? authRedirect(AuthState auth, String location) {
       break;
   }
 
-  // Authenticated: keep out of splash/auth screens.
-  if (location == '/splash' || _authRoutes.contains(location)) return '/home';
+  // Authenticated: keep out of splash/onboarding/auth screens.
+  if (location == '/splash' ||
+      location == '/onboarding' ||
+      _authRoutes.contains(location)) {
+    return '/home';
+  }
   return null;
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
   final refresh = ValueNotifier(0);
   ref.listen(authNotifierProvider, (_, _) => refresh.value++);
+  ref.listen(onboardingSeenProvider, (_, _) => refresh.value++);
   ref.onDispose(refresh.dispose);
 
   return GoRouter(
     initialLocation: '/splash',
     refreshListenable: refresh,
-    redirect: (context, state) =>
-        authRedirect(ref.read(authNotifierProvider), state.matchedLocation),
+    redirect: (context, state) => authRedirect(
+      ref.read(authNotifierProvider),
+      state.matchedLocation,
+      onboardingSeen: ref.read(onboardingSeenProvider),
+    ),
     routes: [
       // Public / auth routes (outside the shell — no bottom nav)
       GoRoute(path: '/splash', builder: (_, _) => const SplashScreen()),
+      GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingScreen()),
       GoRoute(
         path: '/login',
         builder: (_, _) => const AuthScreen(initialTab: 0),

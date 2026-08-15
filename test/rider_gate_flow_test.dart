@@ -99,7 +99,7 @@ void main() {
     final auth = container.read(authNotifierProvider);
     expect(auth, isA<Authenticated>());
     expect((auth as Authenticated).riderGate, RiderGate.locked);
-    expect(authRedirect(auth, '/home'), '/verification');
+    expect(authRedirect(auth, '/home', onboardingSeen: true), '/verification');
   });
 
   test('a rider who has not applied yet is held too', () async {
@@ -127,7 +127,7 @@ void main() {
 
     final auth = container.read(authNotifierProvider) as Authenticated;
     expect(auth.riderGate, RiderGate.open);
-    expect(authRedirect(auth, '/home'), isNull);
+    expect(authRedirect(auth, '/home', onboardingSeen: true), isNull);
   });
 
   test('a passenger is never held', () async {
@@ -139,23 +139,25 @@ void main() {
 
     final auth = container.read(authNotifierProvider) as Authenticated;
     expect(auth.riderGate, RiderGate.open);
-    expect(authRedirect(auth, '/home'), isNull);
+    expect(authRedirect(auth, '/home', onboardingSeen: true), isNull);
   });
 
-  test('an unreachable server holds the rider rather than letting them in',
-      () async {
-    final container = _container(
-      user: _user(signedUpAsRider: true),
-      offline: true,
-    );
-    container.listen(authNotifierProvider, (_, _) {});
+  test(
+    'an unreachable server holds the rider rather than letting them in',
+    () async {
+      final container = _container(
+        user: _user(signedUpAsRider: true),
+        offline: true,
+      );
+      container.listen(authNotifierProvider, (_, _) {});
 
-    await _settle();
-    await _settle();
+      await _settle();
+      await _settle();
 
-    final auth = container.read(authNotifierProvider) as Authenticated;
-    expect(auth.riderGate, RiderGate.locked);
-  });
+      final auth = container.read(authNotifierProvider) as Authenticated;
+      expect(auth.riderGate, RiderGate.locked);
+    },
+  );
 
   test('no session lands on login', () async {
     final container = _container(user: null);
