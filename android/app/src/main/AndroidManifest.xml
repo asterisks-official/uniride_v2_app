@@ -8,6 +8,11 @@
          never ship without it. -->
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <!-- Location. Both, because Android 12+ lets the user grant only the
+         coarse one and the app has to keep working when they do — a pickup
+         pin nudged by a few hundred metres is still far better than none. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <application
         android:label="uniride_app"
         android:name="${applicationName}"

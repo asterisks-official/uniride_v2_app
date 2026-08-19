@@ -1,8 +1,11 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/network/api_exception_mapper.dart';
+import '../../../places/domain/models/campus.dart';
+import '../../../places/domain/models/saved_place.dart';
 import '../../domain/models/pagination.dart';
 import '../../domain/models/ride.dart';
+import '../../domain/models/ride_quote.dart';
 import '../../domain/models/ride_request.dart';
 import '../datasources/rides_remote_datasource.dart';
 
@@ -152,6 +155,79 @@ class RidesRepository {
   Future<void> confirmRide(String rideId) async {
     try {
       await _remote.confirmRide(rideId);
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  // ── Ride creation, campus shape ───────────────────────────────────────────────
+
+  /// What a trip between [lat]/[lng] and a campus costs.
+  ///
+  /// The client sends coordinates and gets back a price. It never computes one
+  /// — two devices would disagree, and the disagreement would surface as a
+  /// rider and a passenger seeing different numbers for the same ride.
+  Future<RideQuote> quote({
+    required double fromLat,
+    required double fromLng,
+    required double toLat,
+    required double toLng,
+  }) async {
+    try {
+      final data = await _remote.quoteRide({
+        'fromLat': fromLat,
+        'fromLng': fromLng,
+        'toLat': toLat,
+        'toLng': toLng,
+      });
+      return RideQuote.fromJson(data);
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  /// Posts a trip: two real points, priced server-side.
+  ///
+  /// One call for both modes. `INSTANT` omits [scheduledAt] and the server
+  /// stamps the request time; `SCHEDULED` requires it.
+  Future<String> createTrip({
+    required String type,
+    required String mode,
+    required PickedPlace pickup,
+    required PickedPlace destination,
+    String? scheduledAt,
+    String genderPref = 'ANY',
+  }) async {
+    try {
+      final data = await _remote.createRide({
+        'type': type,
+        'mode': mode,
+        'pickup': _point(pickup),
+        'destination': _point(destination),
+        'scheduledAt': ?scheduledAt,
+        'genderPref': genderPref,
+        // No fare and no seat count: the server prices the trip, and launch is
+        // bike-only so every ride carries one.
+      });
+      return data['id'] as String;
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  Map<String, dynamic> _point(PickedPlace place) => {
+    'lat': place.lat,
+    'lng': place.lng,
+    'address': place.displayName,
+    'areaLabel': place.areaLabel,
+  };
+
+  Future<List<University>> myUniversities() async {
+    try {
+      final rows = await _remote.myUniversities();
+      return rows
+          .map((e) => University.fromJson(e as Map<String, dynamic>))
+          .toList();
     } on DioException catch (e) {
       throw mapDioException(e);
     }

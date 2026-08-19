@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/account_enums.dart';
 import '../../../../core/di/providers.dart';
+import '../../../../core/providers/gender_provider.dart';
 import '../../../../shared/exceptions/app_exception.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../domain/models/user.dart';
@@ -197,6 +198,9 @@ class AuthNotifier extends Notifier<AuthState> {
 
   Future<void> logout() async {
     await _repo.logout();
+    // The next account on this device must not inherit the previous user's
+    // gender, which decides what the compose screen offers.
+    ref.read(cachedGenderProvider.notifier).clear();
     state = const Unauthenticated();
   }
 

@@ -180,6 +180,11 @@ class _RideDetailBody extends StatelessWidget {
 
   bool get _isRider => currentUserId != null && currentUserId == ride.riderId;
 
+  /// Whoever posted the ride — for a REQUEST that is the passenger, who still
+  /// owns the post (view requests, cancel) even though they are not the rider.
+  bool get _isOwner =>
+      currentUserId != null && currentUserId == ride.creator.id;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -324,7 +329,10 @@ class _RideDetailBody extends StatelessWidget {
           ],
 
           // ── CTA ─────────────────────────────────────────────────────────────
-          if (_isRider)
+          // A searching post shows owner controls to its creator on both
+          // sides; without this, a passenger who posted a REQUEST would see a
+          // "Request to Join" button on their own ride.
+          if (_isRider || (_isOwner && ride.status == 'SEARCHING'))
             _RiderCTA(
               ride: ride,
               actioning: actioning,
@@ -440,6 +448,12 @@ class _RiderCTA extends StatelessWidget {
       case 'CANCELLED':
         return const _StatusChip(label: 'Ride cancelled', color: AppColors.muted);
 
+      case 'EXPIRED':
+        return const _StatusChip(
+          label: 'Expired — nobody took this ride',
+          color: AppColors.muted,
+        );
+
       default:
         return const SizedBox.shrink();
     }
@@ -519,6 +533,12 @@ class _PassengerCTA extends StatelessWidget {
 
       case 'CANCELLED':
         return const _StatusChip(label: 'Ride cancelled', color: AppColors.muted);
+
+      case 'EXPIRED':
+        return const _StatusChip(
+          label: 'Expired — nobody took this ride',
+          color: AppColors.muted,
+        );
 
       default:
         return const SizedBox.shrink();

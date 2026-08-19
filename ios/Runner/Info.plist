@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Shown verbatim in the system permission prompt, so it says what the
+	     location is for rather than that one is wanted. -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>UniRide uses your location to set your pick-up point and to match you with riders nearby.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

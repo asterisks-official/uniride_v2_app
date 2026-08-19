@@ -19,6 +19,7 @@ import '../../../auth/presentation/providers/auth_notifier.dart';
 import '../../domain/models/rider_profile.dart';
 import '../providers/rider_notifier.dart';
 import '../widgets/rider_form_widgets.dart';
+import '../widgets/rider_unlocked_celebration.dart';
 import 'face_verification_screen.dart';
 
 class RiderVerificationScreen extends ConsumerStatefulWidget {
@@ -1247,7 +1248,7 @@ class _PrivacyNote extends StatelessWidget {
 
 // ── Status view (a profile already exists) ───────────────────────────────────
 
-class _RiderStatus extends ConsumerWidget {
+class _RiderStatus extends ConsumerStatefulWidget {
   const _RiderStatus({
     required this.profile,
     required this.locked,
@@ -1264,7 +1265,52 @@ class _RiderStatus extends ConsumerWidget {
   final VoidCallback onCorrect;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_RiderStatus> createState() => _RiderStatusState();
+}
+
+class _RiderStatusState extends ConsumerState<_RiderStatus> {
+  bool _enabling = false;
+
+  /// Turns an approval into actual access, then makes a moment of it.
+  ///
+  /// The refresh is what grants the RIDER role to this session — until it
+  /// lands nothing has changed, so the celebration waits on it rather than
+  /// playing over a request that can still fail. And it only plays if the role
+  /// actually came back granted: a server that approved the documents without
+  /// promoting the account is a state worth reporting, not congratulating.
+  Future<void> _enableRider() async {
+    setState(() => _enabling = true);
+    try {
+      await ref.read(authNotifierProvider.notifier).refreshSession();
+    } on AppException catch (e) {
+      if (mounted) showAppSnack(context, e.message, isError: true);
+      return;
+    } finally {
+      if (mounted) setState(() => _enabling = false);
+    }
+    if (!mounted) return;
+
+    final granted =
+        ref.read(authNotifierProvider.notifier).currentUser?.role == 'RIDER';
+    if (!granted) {
+      showAppSnack(
+        context,
+        'Rider access hasn’t come through yet. Try again in a moment.',
+        isError: true,
+      );
+      return;
+    }
+
+    final leave = await RiderUnlockedCelebration.open(context);
+    if (leave == true && mounted) leaveRiderFlow(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final profile = widget.profile;
+    final locked = widget.locked;
+    final onCorrect = widget.onCorrect;
+
     final status = profile.verificationStatus;
     final approved = status == 'APPROVED';
     // Out of attempts: the account is blocked server-side, and the session
@@ -1411,14 +1457,10 @@ class _RiderStatus extends ConsumerWidget {
                     else if (approved && !isRider)
                       AppButton(
                         label: 'Enable rider features',
-                        onPressed: () async {
-                          await ref
-                              .read(authNotifierProvider.notifier)
-                              .refreshSession();
-                          if (context.mounted) {
-                            showAppSnack(context, 'Rider mode enabled');
-                          }
-                        },
+                        icon: Icons.two_wheeler_rounded,
+                        loading: _enabling,
+                        loadingLabel: 'Switching you over',
+                        onPressed: _enableRider,
                       )
                     else
                       AppButton(

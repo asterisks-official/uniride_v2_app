@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'core/config/app_env.dart';
+import 'core/providers/gender_provider.dart';
 import 'core/providers/onboarding_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
@@ -21,9 +22,15 @@ void main() async {
   // knows whether to show onboarding — deciding it asynchronously would flash
   // the login screen on a fresh install.
   final onboardingSeen = await getOnboardingSeen();
+  // Read alongside it so the compose screen knows on its first frame whether
+  // to offer the women-only option, rather than after /users/me lands.
+  final cachedGender = await getCachedGender();
   final overrides = [
     onboardingSeenProvider.overrideWith(
       () => OnboardingNotifier(onboardingSeen),
+    ),
+    cachedGenderProvider.overrideWith(
+      () => CachedGenderNotifier(cachedGender),
     ),
   ];
 

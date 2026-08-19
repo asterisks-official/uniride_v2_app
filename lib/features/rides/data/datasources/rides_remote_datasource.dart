@@ -55,6 +55,19 @@ class RidesRemoteDataSource {
     return _data(res);
   }
 
+  Future<Map<String, dynamic>> quoteRide(Map<String, dynamic> body) async {
+    final res = await _dio.post<Map<String, dynamic>>(
+      '/rides/quote',
+      data: body,
+    );
+    return _data(res);
+  }
+
+  Future<List<dynamic>> myUniversities() async {
+    final res = await _dio.get<Map<String, dynamic>>('/universities/mine');
+    return (res.data?['data'] as List<dynamic>?) ?? const [];
+  }
+
   // ── Passenger actions ─────────────────────────────────────────────────────────
 
   Future<Map<String, dynamic>> requestRide(

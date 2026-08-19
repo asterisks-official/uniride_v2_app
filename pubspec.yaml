@@ -39,8 +39,22 @@ dependencies:
   go_router: ^17.2.3
   dio: ^5.9.2
   socket_io_client: ^3.1.4
+  # OpenStreetMap for development: renders with no API key and no billing
+  # account, which is the whole reason it is here rather than Google Maps.
+  #
+  # NOT the launch configuration. The public OSM tile server is not licensed
+  # for app-scale use, so before release this moves to either a paid tile host
+  # (MapTiler / Stadia) or Google Maps. Only two widgets touch the provider —
+  # the location picker and the route preview — so the swap is contained; see
+  # SETUP.md §6.
+  #
+  # Note that tiles and place search are independent: the Places proxy on the
+  # backend can be pointed at Google without changing a single widget here.
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
+  # Location. Asked for in context — when a screen actually needs a position —
+  # never cold at launch; see location_service.dart.
+  geolocator: ^13.0.2
   sentry_flutter: ^8.9.0
   connectivity_plus: ^6.1.1
   firebase_core: ^4.9.0
