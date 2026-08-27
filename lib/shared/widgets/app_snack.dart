@@ -2,6 +2,24 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
 
+/// The app's one ScaffoldMessenger, for messages that outlive the screen that
+/// caused them.
+///
+/// Needed because some things are announced by the server, not by a tap: a
+/// ride cancelled on someone else's phone has to say so wherever its recipient
+/// happens to be, and the code that hears it holds no BuildContext.
+final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
+/// Like [showAppSnack], but from anywhere — no context required.
+///
+/// Silently does nothing before the app has mounted, which is correct: there
+/// is no one to tell yet.
+void showGlobalSnack(String message, {bool isError = false}) {
+  final messenger = scaffoldMessengerKey.currentState;
+  if (messenger == null) return;
+  _show(messenger, message, isError);
+}
+
 /// Floating, rounded toast in the app's own palette.
 ///
 /// Material's default snackbar is a square slab pinned to the bottom edge,
@@ -14,7 +32,10 @@ void showAppSnack(
 }) {
   final messenger = ScaffoldMessenger.maybeOf(context);
   if (messenger == null) return;
+  _show(messenger, message, isError);
+}
 
+void _show(ScaffoldMessengerState messenger, String message, bool isError) {
   messenger
     ..hideCurrentSnackBar()
     ..showSnackBar(

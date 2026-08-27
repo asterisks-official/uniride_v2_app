@@ -11,12 +11,22 @@ import '../../features/rides/data/repositories/rides_repository.dart';
 import '../../features/places/data/datasources/places_remote_datasource.dart';
 import '../../features/places/data/repositories/places_repository.dart';
 import '../../features/places/data/repositories/geocoding_repository.dart';
+import '../../features/ratings/data/ratings_repository.dart';
 import '../../features/drivers/data/repositories/drivers_repository.dart';
 import '../network/api_client.dart';
+import '../realtime/realtime_service.dart';
 import '../storage/secure_storage.dart';
 
 final secureStorageProvider = Provider<SecureStorage>((ref) {
   return SecureStorage(const FlutterSecureStorage());
+});
+
+/// The live channel. Connected once, kept for the app's lifetime — the feed
+/// and anything else that wants server pushes listen to the same socket.
+final realtimeServiceProvider = Provider<RealtimeService>((ref) {
+  final service = RealtimeService(ref.watch(secureStorageProvider));
+  ref.onDispose(service.dispose);
+  return service;
 });
 
 final apiClientProvider = Provider<ApiClient>((ref) {
@@ -48,6 +58,10 @@ final riderRepositoryProvider = Provider<RiderRepository>((ref) {
 
 final ridesRemoteDataSourceProvider = Provider<RidesRemoteDataSource>((ref) {
   return RidesRemoteDataSource(ref.watch(apiClientProvider).dio);
+});
+
+final ratingsRepositoryProvider = Provider<RatingsRepository>((ref) {
+  return RatingsRepository(ref.watch(apiClientProvider).dio);
 });
 
 final ridesRepositoryProvider = Provider<RidesRepository>((ref) {

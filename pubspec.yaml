@@ -39,6 +39,9 @@ dependencies:
   go_router: ^17.2.3
   dio: ^5.9.2
   socket_io_client: ^3.1.4
+
+  # Handing the trip off to Google Maps for turn-by-turn.
+  url_launcher: ^6.3.1
   # OpenStreetMap for development: renders with no API key and no billing
   # account, which is the whole reason it is here rather than Google Maps.
   #

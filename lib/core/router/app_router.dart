@@ -15,6 +15,8 @@ import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/rider/presentation/screens/rider_verification_screen.dart';
 import '../../features/rides/presentation/screens/create_ride_screen.dart';
 import '../../features/rides/presentation/screens/my_rides_screen.dart';
+import '../../features/payments/presentation/screens/ride_payment_screen.dart';
+import '../../features/ratings/presentation/screens/rate_ride_screen.dart';
 import '../../features/rides/presentation/screens/ride_detail_screen.dart';
 import '../../features/rides/presentation/screens/ride_requests_screen.dart';
 import '../../features/rides/presentation/screens/ride_waiting_screen.dart';
@@ -156,6 +158,16 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: 'waiting',
             builder: (_, state) =>
                 RideWaitingScreen(rideId: state.pathParameters['id']!),
+          ),
+          GoRoute(
+            path: 'pay',
+            builder: (_, state) =>
+                RidePaymentScreen(rideId: state.pathParameters['id']!),
+          ),
+          GoRoute(
+            path: 'rate',
+            builder: (_, state) =>
+                RateRideScreen(rideId: state.pathParameters['id']!),
           ),
         ],
       ),

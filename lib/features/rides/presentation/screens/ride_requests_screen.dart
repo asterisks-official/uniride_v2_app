@@ -2,9 +2,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/widgets/app_snack.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/error_retry.dart';
 import '../../../../shared/widgets/skeleton.dart';
@@ -42,18 +44,22 @@ class _RideRequestsScreenState extends ConsumerState<RideRequestsScreen> {
 
       if (mounted) {
         HapticFeedback.mediumImpact();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              action == 'ACCEPT'
-                  ? 'Request accepted — ride is now matched!'
-                  : 'Request declined.',
-            ),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor:
-                action == 'ACCEPT' ? AppColors.success : null,
-          ),
-        );
+
+        if (action == 'ACCEPT') {
+          showAppSnack(context, 'Matched. Coordinate the pickup from here.');
+          // Straight to the ride. Accepting is the end of this screen's job —
+          // the list behind it is now a set of requests for a seat that is
+          // taken, and leaving someone on it to find their own way to the
+          // ride is a step with no decision in it.
+          //
+          // pushReplacement rather than pop: this screen is reached from the
+          // detail screen *and* from the waiting screen, and only one of
+          // those pops back to somewhere useful.
+          context.pushReplacement('/rides/${widget.rideId}');
+          return true;
+        }
+
+        showAppSnack(context, 'Request declined.');
       }
       return true;
     } catch (e) {

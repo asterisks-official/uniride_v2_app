@@ -136,9 +136,19 @@ class RidesRepository {
 
   // ── Ride lifecycle ────────────────────────────────────────────────────────────
 
-  Future<void> startRide(String rideId) async {
+  Future<void> startRide(String rideId, {double? lat, double? lng}) async {
     try {
-      await _remote.startRide(rideId);
+      await _remote.startRide(rideId, lat: lat, lng: lng);
+    } on DioException catch (e) {
+      throw mapDioException(e);
+    }
+  }
+
+  /// The passenger's half of starting. Until this lands the ride is matched
+  /// but not under way.
+  Future<void> confirmStart(String rideId, {double? lat, double? lng}) async {
+    try {
+      await _remote.confirmStart(rideId, lat: lat, lng: lng);
     } on DioException catch (e) {
       throw mapDioException(e);
     }
@@ -152,9 +162,17 @@ class RidesRepository {
     }
   }
 
-  Future<void> confirmRide(String rideId) async {
+  /// Returns the ride's status after the confirmation lands.
+  ///
+  /// The caller needs it: a confirmation that completes the ride sends both
+  /// people on to payment, and one that does not leaves them waiting for the
+  /// other side. Waiting for the server to say so over the socket makes the
+  /// person who just tapped depend on a round-trip to learn what their own tap
+  /// did — the answer is already in this response.
+  Future<String?> confirmRide(String rideId, {double? lat, double? lng}) async {
     try {
-      await _remote.confirmRide(rideId);
+      final data = await _remote.confirmRide(rideId, lat: lat, lng: lng);
+      return data['status'] as String?;
     } on DioException catch (e) {
       throw mapDioException(e);
     }

@@ -107,9 +107,32 @@ class RidesRemoteDataSource {
 
   // ── Ride lifecycle ────────────────────────────────────────────────────────────
 
-  Future<Map<String, dynamic>> startRide(String rideId) async {
-    final res =
-        await _dio.patch<Map<String, dynamic>>('/rides/$rideId/start');
+  Future<Map<String, dynamic>> startRide(
+    String rideId, {
+    double? lat,
+    double? lng,
+  }) async {
+    final res = await _dio.patch<Map<String, dynamic>>(
+      '/rides/$rideId/start',
+      data: _where(lat, lng),
+    );
+    return _data(res);
+  }
+
+  /// Where the phone was, or an empty body. Both or neither — the server
+  /// rejects a lone latitude and it would not mean anything anyway.
+  Map<String, dynamic> _where(double? lat, double? lng) =>
+      (lat != null && lng != null) ? {'lat': lat, 'lng': lng} : const {};
+
+  Future<Map<String, dynamic>> confirmStart(
+    String rideId, {
+    double? lat,
+    double? lng,
+  }) async {
+    final res = await _dio.patch<Map<String, dynamic>>(
+      '/rides/$rideId/confirm-start',
+      data: _where(lat, lng),
+    );
     return _data(res);
   }
 
@@ -121,9 +144,15 @@ class RidesRemoteDataSource {
     return _data(res);
   }
 
-  Future<Map<String, dynamic>> confirmRide(String rideId) async {
-    final res =
-        await _dio.patch<Map<String, dynamic>>('/rides/$rideId/confirm');
+  Future<Map<String, dynamic>> confirmRide(
+    String rideId, {
+    double? lat,
+    double? lng,
+  }) async {
+    final res = await _dio.patch<Map<String, dynamic>>(
+      '/rides/$rideId/confirm',
+      data: _where(lat, lng),
+    );
     return _data(res);
   }
 

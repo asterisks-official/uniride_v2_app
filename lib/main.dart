@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
+import 'shared/widgets/app_snack.dart';
 import 'core/config/app_env.dart';
 import 'core/providers/gender_provider.dart';
 import 'core/providers/onboarding_provider.dart';
+import 'core/realtime/realtime_navigator.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'shared/widgets/loading_overlay.dart';
@@ -29,9 +31,7 @@ void main() async {
     onboardingSeenProvider.overrideWith(
       () => OnboardingNotifier(onboardingSeen),
     ),
-    cachedGenderProvider.overrideWith(
-      () => CachedGenderNotifier(cachedGender),
-    ),
+    cachedGenderProvider.overrideWith(() => CachedGenderNotifier(cachedGender)),
   ];
 
   if (_sentryDsn.isNotEmpty) {
@@ -57,8 +57,14 @@ class UniRideApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    // Watched here and nowhere else: it is the app's single live-navigation
+    // listener, and a second subscription would navigate twice.
+    ref.watch(realtimeNavigatorProvider);
     return MaterialApp.router(
       title: 'UniRide',
+      // Lets the realtime listeners raise a message without a screen — they
+      // fire because the server said something, not because anyone tapped.
+      scaffoldMessengerKey: scaffoldMessengerKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       routerConfig: router,

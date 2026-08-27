@@ -76,8 +76,9 @@ class LocationPickerScreen extends ConsumerStatefulWidget {
 class _LocationPickerScreenState extends ConsumerState<LocationPickerScreen> {
   static const _dhaka = LatLng(23.7806, 90.4074);
 
-  /// Reverse geocoding is billed per call, so a continuous pan waits this long
-  /// after the camera stops before asking what it landed on.
+  /// A continuous pan waits this long after the camera stops before asking
+  /// what it landed on. Not a billing measure on the OSM path — it is what
+  /// stops the label churning through every building crossed mid-drag.
   static const _labelDebounce = Duration(milliseconds: 450);
 
   /// Autocomplete likewise: one request per typed word, not per keystroke.
@@ -344,7 +345,10 @@ class _LocationPickerScreenState extends ConsumerState<LocationPickerScreen> {
                         initialCenter: _centre,
                         initialZoom: widget.initial != null ? 16 : 13,
                         minZoom: 10,
-                        maxZoom: 18,
+                        // 19 is as far as OSM carto renders. The extra level
+                        // past 18 is what puts the pin on the right side of a
+                        // road rather than merely on it.
+                        maxZoom: 19,
                         onPositionChanged: _onPositionChanged,
                         onMapEvent: _onMapEvent,
                         interactionOptions: const InteractionOptions(

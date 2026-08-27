@@ -66,6 +66,9 @@ class Ride {
     required this.genderPref,
     this.passenger,
     this.pendingRequestCount,
+    this.riderConfirmed = false,
+    this.passengerConfirmed = false,
+    this.startedAt,
   }) : _createdAt = createdAt;
 
   final String id;
@@ -101,6 +104,27 @@ class Ride {
       destLng != null &&
       !(originLat == 0 && originLng == 0) &&
       !(destLat == 0 && destLng == 0);
+  /// A ride completes only when *both* sides say it did, so these are the
+  /// difference between "nothing happened" and "your half is done".
+  ///
+  /// They were on the wire from the start and simply not parsed, which left
+  /// the detail screen unable to tell the two apart: it re-offered the confirm
+  /// button to someone who had already pressed it, and the second press came
+  /// back 409 Already confirmed.
+  final bool riderConfirmed;
+  final bool passengerConfirmed;
+
+  /// When the rider said they set off — not when the trip began.
+  ///
+  /// Set while the ride is still `MATCHED`: the pair of them is the waiting
+  /// room between the rider starting and the passenger agreeing they have.
+  /// [awaitingStartConfirmation] is that state by name.
+  final DateTime? startedAt;
+
+  /// The rider has started; the passenger has not yet confirmed it.
+  bool get awaitingStartConfirmation =>
+      status == 'MATCHED' && startedAt != null;
+
   final DateTime scheduledAt;
 
   /// When the post was made. Falls back to [scheduledAt], which for an
@@ -173,6 +197,12 @@ class Ride {
           ? PassengerSummary.fromJson(passengerJson)
           : null,
       pendingRequestCount: (count?['requests'] as num?)?.toInt(),
+      riderConfirmed: json['riderConfirmed'] as bool? ?? false,
+      passengerConfirmed: json['passengerConfirmed'] as bool? ?? false,
+      startedAt: switch (json['startedAt']) {
+        final String raw => DateTime.tryParse(raw),
+        _ => null,
+      },
     );
   }
 }

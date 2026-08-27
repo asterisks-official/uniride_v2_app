@@ -58,6 +58,9 @@ class GeocodingRepository {
     }
   }
 
+  static String _coordinate(double lat, double lng) =>
+      '${lat.toStringAsFixed(5)}, ${lng.toStringAsFixed(5)}';
+
   /// What is at a dropped pin — the most specific thing there.
   ///
   /// A building, a business, a road. Not the neighbourhood: pinning a
@@ -74,9 +77,12 @@ class GeocodingRepository {
       );
       final data = res.data?['data'] as Map<String, dynamic>?;
       final name = (data?['name'] ?? data?['areaLabel']) as String?;
-      return (name == null || name.isEmpty) ? 'Dropped pin' : name;
+      return (name == null || name.isEmpty) ? _coordinate(lat, lng) : name;
     } on DioException {
-      return 'Dropped pin';
+      // The server is unreachable, so nothing is known about this point but
+      // the point itself. Say that, rather than "Dropped pin" — the pin is
+      // still exact, and a coordinate shows it.
+      return _coordinate(lat, lng);
     }
   }
 }
