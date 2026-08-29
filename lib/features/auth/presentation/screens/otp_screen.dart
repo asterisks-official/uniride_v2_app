@@ -56,8 +56,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   Future<void> _submit() async {
     final code = _otp.text.trim();
-    if (code.length != 4) {
-      showAppSnack(context, 'Enter the 4-digit code', isError: true);
+    if (code.length != 6) {
+      showAppSnack(context, 'Enter the 6-digit code', isError: true);
       return;
     }
     FocusScope.of(context).unfocus();
@@ -99,7 +99,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
           const SizedBox(height: 8),
           Text.rich(
             TextSpan(
-              text: 'Enter the 4-digit verification code we sent to ',
+              text: 'Enter the 6-digit verification code we sent to ',
               style: const TextStyle(
                 color: AppColors.textSecondary,
                 height: 1.4,
