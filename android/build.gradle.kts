@@ -1,3 +1,18 @@
+// On the classpath rather than in settings' `plugins` block, because app/
+// applies it imperatively behind an existence check and a `plugins { }` entry
+// -- even one declared `apply false` -- is not visible to `apply(plugin = ...)`.
+// Declaring it there instead makes the apply silently do nothing: the build
+// succeeds, and the APK ships with no Firebase resources in it at all.
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.google.gms:google-services:4.4.2")
+    }
+}
+
 allprojects {
     repositories {
         google()
