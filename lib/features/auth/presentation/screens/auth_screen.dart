@@ -352,10 +352,10 @@ class _RegisterFormState extends ConsumerState<_RegisterForm> {
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
               isRider
-                  ? "We'll email you a 6-digit code. After that you'll add "
+                  ? "We'll email you a 4-digit code. After that you'll add "
                       'your vehicle, documents and a face check — riding is '
                       'open to you once an admin approves them.'
-                  : "We'll email you a 6-digit code to verify your account.",
+                  : "We'll email you a 4-digit code to verify your account.",
               style: const TextStyle(
                 color: AppColors.muted,
                 fontSize: 12,

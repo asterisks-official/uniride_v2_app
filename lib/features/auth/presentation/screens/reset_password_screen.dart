@@ -84,8 +84,8 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
               keyboardType: TextInputType.number,
               textInputAction: TextInputAction.next,
               prefixIcon: Icons.pin_outlined,
-              validator: (v) => (v == null || v.trim().length != 6)
-                  ? 'Enter the 6-digit code'
+              validator: (v) => (v == null || v.trim().length != 4)
+                  ? 'Enter the 4-digit code'
                   : null,
             ),
             const SizedBox(height: 16),
