@@ -6,6 +6,7 @@ import 'shared/widgets/app_snack.dart';
 import 'core/config/app_env.dart';
 import 'core/providers/gender_provider.dart';
 import 'core/providers/onboarding_provider.dart';
+import 'core/push/push_service.dart';
 import 'core/realtime/realtime_navigator.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
@@ -17,8 +18,11 @@ const _sentryDsn = String.fromEnvironment('SENTRY_DSN');
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase.initializeApp() goes here once google-services.json / GoogleService-Info.plist
-  // are added and firebase_options.dart is generated via flutterfire configure.
+  // Push. Never throws: a device without Play Services, or with notifications
+  // denied, still has to be able to book a ride. The token is fetched and
+  // registered after sign-in, not here, so the permission prompt arrives when
+  // the app can explain itself rather than on a cold first open.
+  await PushService.init();
 
   // Read before the first frame so the router's very first redirect already
   // knows whether to show onboarding — deciding it asynchronously would flash

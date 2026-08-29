@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/account_enums.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/providers/gender_provider.dart';
+import '../../../../core/push/push_service.dart';
 import '../../../../shared/exceptions/app_exception.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../domain/models/user.dart';
@@ -95,6 +98,13 @@ class AuthNotifier extends Notifier<AuthState> {
       user,
       riderGate: needsCheck ? RiderGate.checking : RiderGate.open,
     );
+
+    // Deliberately not awaited: registering for push must not delay the first
+    // authenticated frame, and it is allowed to fail. Every path into a signed
+    // in state lands here — login, registration, and a restored session — so
+    // this is the one place it needs to happen.
+    unawaited(_registerForPush());
+
     if (!needsCheck) return;
 
     final gate = await _riderGateFor(user);
@@ -103,6 +113,29 @@ class AuthNotifier extends Notifier<AuthState> {
     if (current is Authenticated && current.user.id == user.id) {
       state = Authenticated(user, riderGate: gate);
     }
+  }
+
+  /// Hands the backend this install's FCM token, and keeps doing so when FCM
+  /// rotates it. Without the refresh listener a long-lived session goes quiet
+  /// at the first rotation with nothing to show for it.
+  Future<void> _registerForPush() async {
+    final token = await PushService.token();
+    if (token == null) return;
+
+    final repo = _repo;
+    await repo.registerDevice(
+      fcmToken: token,
+      deviceType: PushService.deviceType,
+    );
+    PushService.onTokenRefresh((refreshed) {
+      // Only while still signed in — a token registered after logout would
+      // deliver another user's notifications to this device.
+      if (state is! Authenticated) return;
+      repo.registerDevice(
+        fcmToken: refreshed,
+        deviceType: PushService.deviceType,
+      );
+    });
   }
 
   Future<RiderGate> _riderGateFor(User user) async {
@@ -197,6 +230,9 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<void> logout() async {
+    // Stop first: a rotation arriving mid-logout would re-register this device
+    // against the account that is on its way out.
+    await PushService.stopListening();
     await _repo.logout();
     // The next account on this device must not inherit the previous user's
     // gender, which decides what the compose screen offers.

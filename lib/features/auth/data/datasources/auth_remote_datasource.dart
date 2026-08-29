@@ -81,6 +81,17 @@ class AuthRemoteDataSource {
     return _data(res);
   }
 
+  /// Registers this install for push, or updates the token FCM has rotated.
+  Future<void> registerDevice({
+    required String fcmToken,
+    required String deviceType,
+  }) async {
+    await _dio.post<Map<String, dynamic>>(
+      '/auth/devices',
+      data: {'fcmToken': fcmToken, 'deviceType': deviceType},
+    );
+  }
+
   Future<Map<String, dynamic>> refresh(String refreshToken) async {
     final res = await _dio.post<Map<String, dynamic>>(
       '/auth/refresh',

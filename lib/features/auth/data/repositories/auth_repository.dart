@@ -123,6 +123,20 @@ class AuthRepository {
     });
   }
 
+  /// Best effort, like server-side logout revocation: a device that fails to
+  /// register loses push until the next sign-in, which is not worth failing a
+  /// successful login over.
+  Future<void> registerDevice({
+    required String fcmToken,
+    required String deviceType,
+  }) async {
+    try {
+      await _remote.registerDevice(fcmToken: fcmToken, deviceType: deviceType);
+    } on DioException {
+      // Swallowed on purpose — see above.
+    }
+  }
+
   Future<void> logout() async {
     final refreshToken = await _storage.readRefreshToken();
     if (refreshToken != null && refreshToken.isNotEmpty) {
