@@ -6,7 +6,14 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.gms.google-services")
+}
+
+// Applied only when the Firebase config is present, the same way release
+// signing is. The plugin hard-fails a build without google-services.json, and
+// PushService already treats an absent Firebase as "push unavailable" rather
+// than an error -- so a checkout without the file builds and runs, minus push.
+if (project.file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
 }
 
 // Release signing credentials, kept out of the repository (see android/.gitignore).
