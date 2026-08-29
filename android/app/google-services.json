@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "88858501133",
+    "project_id": "uniride-v2",
+    "storage_bucket": "uniride-v2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:88858501133:android:37aedeb287c1e022763544",
+        "android_client_info": {
+          "package_name": "com.asterisks.uniride"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAoDyj4mbqIfRviq_2n4vV9J-Tl70055pU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

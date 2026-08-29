@@ -5,6 +5,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../firebase_options.dart';
+
 /// Firebase Cloud Messaging, reduced to the two things the app needs: a token
 /// to hand the backend, and a callback when that token changes.
 ///
@@ -30,13 +32,16 @@ class PushService {
 
   /// Starts Firebase. Safe to call more than once.
   ///
-  /// Android reads its configuration from google-services.json at build time,
-  /// so no FirebaseOptions are passed. iOS needs GoogleService-Info.plist added
-  /// to the Runner target before it will succeed here.
+  /// Configured from the generated [DefaultFirebaseOptions] rather than from
+  /// whatever platform config file happens to be on disk, so a build that is
+  /// missing google-services.json fails here -- loudly, in one place -- instead
+  /// of producing an app that looks fine and never receives a notification.
   static Future<void> init() async {
     if (_initialised) return;
     try {
-      await Firebase.initializeApp();
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
       _initialised = true;
     } catch (e) {
       debugPrint('Push unavailable — Firebase did not start: $e');
